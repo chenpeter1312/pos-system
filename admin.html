@@ -1248,7 +1248,11 @@
             const [formData, setFormData] = useState({
                 name: '',
                 type: 'radio'
+            });            console.log('OptionsManagement 渲染中...', { 
+                optionsLibrary, 
+                optionsLibraryLength: optionsLibrary?.length 
             });
+
 
             const handleAddNewOption = () => {
                 setEditingOption(null);
