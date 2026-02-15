@@ -1240,31 +1240,129 @@
             );
         }
 
-                // 附加選項管理組件 (簡化版)
-        function OptionsManagement({ optionsLibrary, onUpdateOptionsLibrary }) {
-            return (
-                <div style={{ padding: '20px' }}>
-                    <h2 style={{ marginBottom: '20px', color: '#6B4423' }}>附加選項管理</h2>
-                    <p style={{ color: '#666', marginBottom: '20px' }}>
-                        管理可供選擇的附加選項，如辣度、飲料、大小等
-                    </p>
-                    
-                    <div style={{ 
-                        padding: '40px', 
-                        textAlign: 'center', 
-                        border: '2px dashed #ccc',
-                        borderRadius: '8px',
-                        marginTop: '20px'
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
-                        <p style={{ fontSize: '16px', color: '#666' }}>
-                            附加選項管理功能
-                        </p>
-                        <p style={{ fontSize: '14px', color: '#999', marginTop: '10px' }}>
-                            選項數量：{optionsLibrary ? optionsLibrary.length : 0}
-                        </p>
-                    </div>
-                </div>
+                        // 附加選項管理組件
+        function OptionsManagement({ optionsLibrary = [], onUpdateOptionsLibrary }) {
+            const [showModal, setShowModal] = React.useState(false);
+            const [editingOption, setEditingOption] = React.useState(null);
+            const [optionName, setOptionName] = React.useState('');
+            const [optionType, setOptionType] = React.useState('radio');
+            const [optionValues, setOptionValues] = React.useState([{ label: '', price: 0 }]);
+
+            const handleAddNew = () => {
+                setEditingOption(null);
+                setOptionName('');
+                setOptionType('radio');
+                setOptionValues([{ label: '', price: 0 }]);
+                setShowModal(true);
+            };
+
+            const handleEdit = (option) => {
+                setEditingOption(option);
+                setOptionName(option.name);
+                setOptionType(option.type);
+                setOptionValues([...option.options]);
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (confirm('確定要刪除這個選項嗎？')) {
+                    onUpdateOptionsLibrary(optionsLibrary.filter(opt => opt.id !== id));
+                }
+            };
+
+            const handleSave = () => {
+                if (!optionName.trim()) { alert('請輸入選項名稱'); return; }
+                if (optionValues.length === 0 || optionValues.some(v => !v.label.trim())) { alert('請至少添加一個選項值'); return; }
+                const newOption = {
+                    id: editingOption ? editingOption.id : \`opt-\${Date.now()}\`,
+                    name: optionName,
+                    type: optionType,
+                    options: optionValues.map(v => ({ label: v.label.trim(), price: Number(v.price) || 0 }))
+                };
+                if (editingOption) {
+                    onUpdateOptionsLibrary(optionsLibrary.map(opt => opt.id === editingOption.id ? newOption : opt));
+                } else {
+                    onUpdateOptionsLibrary([...optionsLibrary, newOption]);
+                }
+                setShowModal(false);
+            };
+
+            const addValue = () => setOptionValues([...optionValues, { label: '', price: 0 }]);
+            const removeValue = (i) => optionValues.length > 1 && setOptionValues(optionValues.filter((_, idx) => idx !== i));
+            const updateValue = (i, f, v) => { const u = [...optionValues]; u[i][f] = v; setOptionValues(u); };
+
+            return React.createElement('div', { style: { padding: '20px' } },
+                React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '20px' } },
+                    React.createElement('div', null,
+                        React.createElement('h2', { style: { color: '#6B4423', marginBottom: '8px' } }, '附加選項管理'),
+                        React.createElement('p', { style: { color: '#666', fontSize: '14px' } }, '管理可供選擇的附加選項，如辣度、飲料、大小等')
+                    ),
+                    React.createElement('button', {
+                        onClick: handleAddNew,
+                        style: { padding: '12px 24px', background: 'linear-gradient(135deg, #8B6F47 0%, #6B4423 100%)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: '600' }
+                    }, '➕ 新增選項')
+                ),
+                optionsLibrary.length === 0 ?
+                    React.createElement('div', { style: { padding: '60px 20px', textAlign: 'center', border: '2px dashed #ddd', borderRadius: '12px', background: '#fff' } },
+                        React.createElement('div', { style: { fontSize: '48px', marginBottom: '16px' } }, '📝'),
+                        React.createElement('p', { style: { fontSize: '16px', color: '#666' } }, '目前沒有附加選項'),
+                        React.createElement('p', { style: { fontSize: '14px', color: '#999', marginTop: '8px' } }, '點擊上方按鈕開始新增')
+                    ) :
+                    React.createElement('div', { style: { display: 'grid', gap: '16px' } },
+                        optionsLibrary.map(option =>
+                            React.createElement('div', { key: option.id, style: { background: '#fff', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '20px' } },
+                                React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '16px' } },
+                                    React.createElement('div', null,
+                                        React.createElement('h3', { style: { color: '#6B4423', marginBottom: '8px' } }, option.name),
+                                        React.createElement('span', { style: { display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', background: option.type === 'radio' ? '#e3f2fd' : '#fff3e0', color: option.type === 'radio' ? '#1976d2' : '#f57c00' } }, option.type === 'radio' ? '單選' : '多選')
+                                    ),
+                                    React.createElement('div', { style: { display: 'flex', gap: '8px' } },
+                                        React.createElement('button', { onClick: () => handleEdit(option), style: { padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer' } }, '編輯'),
+                                        React.createElement('button', { onClick: () => handleDelete(option.id), style: { padding: '8px 16px', background: '#ffebee', color: '#c62828', border: '1px solid #ffcdd2', borderRadius: '6px', cursor: 'pointer' } }, '刪除')
+                                    )
+                                ),
+                                React.createElement('div', { style: { display: 'grid', gap: '8px' } },
+                                    option.options.map((val, idx) =>
+                                        React.createElement('div', { key: idx, style: { display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f9f9f9', borderRadius: '6px' } },
+                                            React.createElement('span', null, val.label),
+                                            React.createElement('span', { style: { fontWeight: 'bold', color: val.price > 0 ? '#6B4423' : '#999' } }, val.price > 0 ? \`+$\${val.price.toFixed(2)}\` : '不加價')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                showModal && React.createElement('div', { style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }, onClick: () => setShowModal(false) },
+                    React.createElement('div', { style: { background: '#fff', borderRadius: '12px', padding: '30px', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto' }, onClick: (e) => e.stopPropagation() },
+                        React.createElement('h3', { style: { marginBottom: '20px', color: '#6B4423' } }, editingOption ? '編輯選項' : '新增選項'),
+                        React.createElement('div', { style: { marginBottom: '20px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, '選項名稱 *'),
+                            React.createElement('input', { type: 'text', value: optionName, onChange: (e) => setOptionName(e.target.value), placeholder: '例如：辣度、飲料、大小', style: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '16px' } })
+                        ),
+                        React.createElement('div', { style: { marginBottom: '20px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, '選項類型'),
+                            React.createElement('select', { value: optionType, onChange: (e) => setOptionType(e.target.value), style: { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '16px' } },
+                                React.createElement('option', { value: 'radio' }, '單選（顧客只能選一個）'),
+                                React.createElement('option', { value: 'checkbox' }, '多選（顧客可選多個）')
+                            )
+                        ),
+                        React.createElement('div', { style: { marginBottom: '20px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, '選項值'),
+                            optionValues.map((val, idx) =>
+                                React.createElement('div', { key: idx, style: { display: 'flex', gap: '8px', marginBottom: '8px' } },
+                                    React.createElement('input', { type: 'text', value: val.label, onChange: (e) => updateValue(idx, 'label', e.target.value), placeholder: '選項名稱', style: { flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '6px' } }),
+                                    React.createElement('input', { type: 'number', value: val.price, onChange: (e) => updateValue(idx, 'price', e.target.value), placeholder: '加價', style: { width: '100px', padding: '10px', border: '1px solid #ddd', borderRadius: '6px' } }),
+                                    React.createElement('button', { onClick: () => removeValue(idx), disabled: optionValues.length === 1, style: { padding: '10px', background: '#ffebee', color: '#c62828', border: 'none', borderRadius: '6px', cursor: optionValues.length === 1 ? 'not-allowed' : 'pointer', opacity: optionValues.length === 1 ? 0.5 : 1 } }, '✕')
+                                )
+                            ),
+                            React.createElement('button', { onClick: addValue, style: { width: '100%', padding: '10px', background: '#f5f5f5', border: '2px dashed #ddd', borderRadius: '6px', cursor: 'pointer', marginTop: '8px' } }, '➕ 添加選項值')
+                        ),
+                        React.createElement('div', { style: { display: 'flex', gap: '12px', justifyContent: 'flex-end' } },
+                            React.createElement('button', { onClick: () => setShowModal(false), style: { padding: '10px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer' } }, '取消'),
+                            React.createElement('button', { onClick: handleSave, style: { padding: '10px 20px', background: 'linear-gradient(135deg, #8B6F47 0%, #6B4423 100%)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' } }, '儲存')
+                        )
+                    )
+                )
             );
         }
 
