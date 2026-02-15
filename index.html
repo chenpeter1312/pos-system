@@ -9,18 +9,21 @@
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        /* 台灣餐廳木質風格配色 */
+        /* 日式定食店風格配色 - 淡雅清新 */
         :root {
             --wood-dark: #6B4423;
             --wood-medium: #8B6F47;
             --wood-light: #D4A574;
-            --cream: #FFF8E7;
-            --cream-dark: #F5E6D3;
+            --wood-pale: #E8DCC8;
+            --cream: #FFFBF5;
+            --cream-dark: #F9F5EF;
             --taiwan-red: #C1272D;
             --taiwan-green: #2F5233;
-            --warm-white: #FFFEF9;
+            --warm-white: #FFFFFF;
             --text-dark: #3E2723;
             --text-medium: #5D4037;
+            --shadow-soft: rgba(107, 68, 35, 0.08);
+            --shadow-medium: rgba(107, 68, 35, 0.12);
         }
 
         * {
@@ -31,12 +34,12 @@
 
         body {
             font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+            background: linear-gradient(135deg, var(--wood-pale) 0%, var(--cream-dark) 100%);
             min-height: 100vh;
             position: relative;
         }
 
-        /* 木質紋理背景 */
+        /* 淡雅木質紋理背景 */
         body::before {
             content: '';
             position: fixed;
@@ -45,8 +48,8 @@
             right: 0;
             bottom: 0;
             background-image:
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(107, 68, 35, 0.03) 2px, rgba(107, 68, 35, 0.03) 4px),
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(107, 68, 35, 0.02) 2px, rgba(107, 68, 35, 0.02) 4px);
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(107, 68, 35, 0.015) 3px, rgba(107, 68, 35, 0.015) 6px),
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(107, 68, 35, 0.01) 3px, rgba(107, 68, 35, 0.01) 6px);
             pointer-events: none;
             z-index: 0;
         }
@@ -60,15 +63,15 @@
         }
 
         .header {
-            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            background: var(--warm-white);
             padding: 20px 30px;
             border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.15);
+            box-shadow: 0 2px 8px var(--shadow-soft);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 2px solid rgba(139, 111, 71, 0.1);
+            border: 1px solid rgba(212, 165, 116, 0.15);
         }
 
         .header h1 {
@@ -107,12 +110,12 @@
         }
 
         .content {
-            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            background: var(--warm-white);
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.15);
+            box-shadow: 0 2px 8px var(--shadow-soft);
             min-height: 600px;
-            border: 2px solid rgba(139, 111, 71, 0.1);
+            border: 1px solid rgba(212, 165, 116, 0.15);
         }
 
         .menu-grid {
@@ -123,19 +126,19 @@
         }
 
         .menu-item {
-            border: 2px solid var(--wood-light);
+            border: 1px solid rgba(212, 165, 116, 0.2);
             border-radius: 12px;
             padding: 20px;
             transition: all 0.3s;
             cursor: pointer;
-            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
-            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.1);
+            background: var(--warm-white);
+            box-shadow: 0 2px 6px var(--shadow-soft);
         }
 
         .menu-item:hover {
-            border-color: var(--wood-medium);
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(107, 68, 35, 0.2);
+            border-color: var(--wood-light);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px var(--shadow-medium);
         }
 
         .menu-item-image {
@@ -248,15 +251,15 @@
         }
 
         .modal-content {
-            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            background: var(--warm-white);
             padding: 30px;
             border-radius: 12px;
             max-width: 800px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
-            border: 2px solid var(--wood-light);
-            box-shadow: 0 8px 32px rgba(107, 68, 35, 0.25);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            box-shadow: 0 4px 20px var(--shadow-medium);
         }
 
         .modal-header {
@@ -347,18 +350,18 @@
         }
 
         .order-card {
-            border: 2px solid var(--wood-light);
+            border: 1px solid rgba(212, 165, 116, 0.2);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 15px;
             transition: all 0.3s;
-            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
-            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.1);
+            background: var(--warm-white);
+            box-shadow: 0 2px 6px var(--shadow-soft);
         }
 
         .order-card:hover {
-            border-color: var(--wood-medium);
-            box-shadow: 0 6px 16px rgba(107, 68, 35, 0.2);
+            border-color: var(--wood-light);
+            box-shadow: 0 4px 12px var(--shadow-medium);
             transform: translateY(-2px);
         }
 
@@ -1756,6 +1759,27 @@
             .btn,
             a {
                 min-height: 44px;
+            }
+
+            /* 📱 日式便當店手機版優化 */
+
+            /* 1️⃣ 縮小歡迎畫面標題 15-20% */
+            .header h1 {
+                font-size: 22px !important;
+            }
+
+            /* 2️⃣ 增加卡片間距 space-y-6 (24px) */
+            .menu-grid {
+                gap: 24px !important;
+            }
+
+            .order-card {
+                margin-bottom: 24px !important;
+            }
+
+            /* 3️⃣ 用餐模式選項卡片間距 */
+            [style*="gap: '16px'"] {
+                gap: 24px !important;
             }
         }
 
@@ -4439,7 +4463,7 @@
                                 >
                                     <div style={{
                                         fontSize: '48px',
-                                        background: 'linear-gradient(135deg, #C1272D 0%, #A01F23 100%)',
+                                        background: 'linear-gradient(135deg, #D4A574 0%, #8B6F47 100%)',
                                         borderRadius: '12px',
                                         width: '72px',
                                         height: '72px',
@@ -4447,7 +4471,7 @@
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0,
-                                        boxShadow: '0 4px 12px rgba(193, 39, 45, 0.3)'
+                                        boxShadow: '0 3px 10px rgba(212, 165, 116, 0.3)'
                                     }}>
                                         🍽️
                                     </div>
@@ -4496,7 +4520,7 @@
                                 >
                                     <div style={{
                                         fontSize: '48px',
-                                        background: 'linear-gradient(135deg, #2F5233 0%, #1e3a20 100%)',
+                                        background: 'linear-gradient(135deg, #D4A574 0%, #8B6F47 100%)',
                                         borderRadius: '12px',
                                         width: '72px',
                                         height: '72px',
@@ -4504,7 +4528,7 @@
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0,
-                                        boxShadow: '0 4px 12px rgba(47, 82, 51, 0.3)'
+                                        boxShadow: '0 3px 10px rgba(212, 165, 116, 0.3)'
                                     }}>
                                         🥡
                                     </div>
@@ -4591,7 +4615,7 @@
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0,
-                                        boxShadow: '0 4px 12px rgba(212, 165, 116, 0.3)'
+                                        boxShadow: '0 3px 10px rgba(212, 165, 116, 0.3)'
                                     }}>
                                         ⏰
                                     </div>
