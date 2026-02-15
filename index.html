@@ -4269,7 +4269,10 @@
             return (
                 <div className="app">
                     <div className="header">
-                        <h1>🍴 點餐系統</h1>
+                        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                            <img src="logo.jpeg" alt="Lee's Logo" style={{ height: '40px', width: '40px', objectFit: 'contain', borderRadius: '50%' }} />
+                            點餐系統
+                        </h1>
                     </div>
 
                     <div className="content">
@@ -4299,10 +4302,17 @@
                                 marginBottom: '40px',
                                 animation: 'fadeIn 0.5s ease-in'
                             }}>
-                                <div style={{
-                                    fontSize: '48px',
-                                    marginBottom: '16px'
-                                }}>🍴</div>
+                                <img
+                                    src="logo.jpeg"
+                                    alt="Lee's Taiwanese Comfort Food"
+                                    style={{
+                                        width: '150px',
+                                        height: '150px',
+                                        objectFit: 'contain',
+                                        marginBottom: '24px',
+                                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))'
+                                    }}
+                                />
                                 <h1 style={{
                                     color: 'white',
                                     fontSize: '32px',
