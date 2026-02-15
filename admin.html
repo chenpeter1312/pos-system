@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 - Lee's Taiwanese Comfort Food</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* 日式定食店風格配色 - 淡雅清新 */
+        :root {
+            --wood-dark: #6B4423;
+            --wood-medium: #8B6F47;
+            --wood-light: #D4A574;
+            --wood-pale: #E8DCC8;
+            --cream: #FFFBF5;
+            --cream-dark: #F9F5EF;
+            --taiwan-red: #C1272D;
+            --taiwan-green: #2F5233;
+            --warm-white: #FFFFFF;
+            --text-dark: #3E2723;
+            --text-medium: #5D4037;
+            --shadow-soft: rgba(107, 68, 35, 0.08);
+            --shadow-medium: rgba(107, 68, 35, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lora', 'Noto Serif TC', serif;
+            background: linear-gradient(135deg, var(--wood-pale) 0%, var(--cream-dark) 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 淡雅木質紋理背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(107, 68, 35, 0.015) 3px, rgba(107, 68, 35, 0.015) 6px),
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(107, 68, 35, 0.01) 3px, rgba(107, 68, 35, 0.01) 6px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .admin-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        /* 登入界面 */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            text-align: center;
+            color: var(--wood-dark);
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        /* 後台佈局 */
+        .admin-layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 側邊欄 */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--wood-dark) 0%, var(--wood-medium) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 10px;
+        }
+
+        .sidebar-menu button {
+            width: 100%;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu button.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 10px;
+            right: 10px;
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sidebar-footer button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 主內容區 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--cream);
+        }
+
+        .content-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .content-header h2 {
+            color: var(--wood-dark);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .content-header p {
+            color: var(--text-medium);
+            font-size: 14px;
+        }
+
+        .content-body {
+            padding: 30px;
+        }
+
+        /* 統計卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #8B6F47 0%, #6B4423 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
+            border: 2px solid rgba(212, 165, 116, 0.3);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* 訂單卡片 */
+        .order-card {
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            background: var(--warm-white);
+            box-shadow: 0 2px 6px var(--shadow-soft);
+        }
+
+        .order-card:hover {
+            border-color: var(--wood-light);
+            box-shadow: 0 4px 12px var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .order-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--wood-dark);
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-accepted {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .order-items {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: 'Lora', 'Noto Serif TC', serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+            color: var(--warm-white);
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood-medium) 100%);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--wood-dark);
+            border: 2px solid var(--wood-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cream-dark);
+            border-color: var(--wood-medium);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--taiwan-red) 0%, #A01F23 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(193, 39, 45, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #A01F23 0%, var(--taiwan-red) 100%);
+            box-shadow: 0 4px 12px rgba(193, 39, 45, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        /* 表格 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px var(--shadow-soft);
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table th {
+            background: #f9fafb;
+            font-weight: bold;
+            color: var(--wood-dark);
+        }
+
+        .table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--warm-white);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            box-shadow: 0 4px 20px var(--shadow-medium);
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--wood-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Lora', 'Noto Serif TC', serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Toggle 開關 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #059669;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .form-group-inline {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .availability-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .badge-available {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .badge-unavailable {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--wood-medium);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .sidebar-footer {
+                position: static;
+                margin-top: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 從 localStorage 讀取數據
+        const loadFromLocalStorage = (key, defaultValue) => {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : defaultValue;
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+                return defaultValue;
+            }
+        };
+
+        // 儲存到 localStorage
+        const saveToLocalStorage = (key, value) => {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+            }
+        };
+
+        // 登入組件
+        function AdminLogin({ onLogin }) {
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleLogin = (e) => {
+                e.preventDefault();
+                if (password === 'admin123') {
+                    onLogin();
+                } else {
+                    setError('密碼錯誤，請重試');
+                }
+            };
+
+            return (
+                <div className="login-container">
+                    <h2 className="login-title">🔐 管理後台登入</h2>
+                    <form onSubmit={handleLogin}>
+                        <div className="form-group">
+                            <label>密碼</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="請輸入管理密碼"
+                            />
+                        </div>
+                        {error && <p style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
+                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                            登入
+                        </button>
+                    </form>
+                    <p style={{ marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px' }}>
+                        預設密碼: admin123
+                    </p>
+                </div>
+            );
+        }
+
+        // 儀表板組件
+        function Dashboard({ orders, menu }) {
+            const today = new Date().toDateString();
+
+            const todayOrders = orders.filter(order =>
+                new Date(order.timestamp).toDateString() === today
+            );
+
+            const stats = {
+                orderCount: todayOrders.length,
+                revenue: todayOrders.reduce((sum, order) => sum + order.total, 0),
+                itemCount: todayOrders.reduce((sum, order) =>
+                    sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0
+                ),
+                pendingCount: todayOrders.filter(o => o.status === 'pending').length
+            };
+
+            const pendingOrders = orders.filter(o => o.status === 'pending');
+
+            return (
+                <div>
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-label">今日訂單數</div>
+                            <div className="stat-value">{stats.orderCount}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">今日營業額</div>
+                            <div className="stat-value">${stats.revenue.toFixed(2)}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">今日銷售數量</div>
+                            <div className="stat-value">{stats.itemCount}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">待處理訂單</div>
+                            <div className="stat-value">{stats.pendingCount}</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#6B4423' }}>
+                        🔔 待處理訂單 ({pendingOrders.length})
+                    </h3>
+
+                    {pendingOrders.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">✅</div>
+                            <p>目前沒有待處理的訂單</p>
+                        </div>
+                    ) : (
+                        pendingOrders.map(order => (
+                            <OrderCard key={order.id} order={order} />
+                        ))
+                    )}
+                </div>
+            );
+        }
+
+        // 訂單管理組件
+        function OrderManagement({ orders, onUpdateOrder }) {
+            const [filter, setFilter] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+
+            const filteredOrders = orders.filter(order => {
+                const matchesFilter = filter === 'all' || order.status === filter;
+                const matchesSearch = order.id.toString().includes(searchTerm) ||
+                                    order.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                        <button
+                            className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('all')}
+                        >
+                            全部 ({orders.length})
+                        </button>
+                        <button
+                            className={`btn ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('pending')}
+                        >
+                            待處理 ({orders.filter(o => o.status === 'pending').length})
+                        </button>
+                        <button
+                            className={`btn ${filter === 'accepted' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('accepted')}
+                        >
+                            進行中 ({orders.filter(o => o.status === 'accepted').length})
+                        </button>
+                        <button
+                            className={`btn ${filter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('completed')}
+                        >
+                            已完成 ({orders.filter(o => o.status === 'completed').length})
+                        </button>
+                    </div>
+
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            placeholder="搜尋訂單編號或顧客姓名..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    {filteredOrders.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">📦</div>
+                            <p>沒有找到訂單</p>
+                        </div>
+                    ) : (
+                        filteredOrders.map(order => (
+                            <OrderCard
+                                key={order.id}
+                                order={order}
+                                onUpdateOrder={onUpdateOrder}
+                            />
+                        ))
+                    )}
+                </div>
+            );
+        }
+
+        // 訂單卡片組件
+        function OrderCard({ order, onUpdateOrder }) {
+            const statusMap = {
+                pending: { text: '待處理', class: 'status-pending' },
+                accepted: { text: '進行中', class: 'status-accepted' },
+                completed: { text: '已完成', class: 'status-completed' },
+                cancelled: { text: '已取消', class: 'status-cancelled' }
+            };
+
+            const handleStatusChange = (newStatus) => {
+                if (onUpdateOrder) {
+                    onUpdateOrder(order.id, { ...order, status: newStatus });
+                }
+            };
+
+            return (
+                <div className="order-card">
+                    <div className="order-header">
+                        <div>
+                            <div className="order-number">訂單 #{order.id}</div>
+                            <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                                {new Date(order.timestamp).toLocaleString('zh-TW')}
+                            </div>
+                        </div>
+                        <span className={`order-status ${statusMap[order.status].class}`}>
+                            {statusMap[order.status].text}
+                        </span>
+                    </div>
+
+                    {order.customerName && (
+                        <div style={{ marginBottom: '10px', fontSize: '15px' }}>
+                            <strong>顧客:</strong> {order.customerName}
+                            {order.phone && ` • ${order.phone}`}
+                        </div>
+                    )}
+
+                    {order.serviceMode && (
+                        <div style={{ marginBottom: '10px', fontSize: '15px' }}>
+                            <strong>用餐方式:</strong> {order.serviceMode === 'dine-in' ? '內用' : '外帶'}
+                        </div>
+                    )}
+
+                    <div className="order-items">
+                        {order.items.map((item, index) => (
+                            <div key={index} className="order-item">
+                                <span>{item.name} x {item.quantity}</span>
+                                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        ))}
+                        <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e5e7eb', fontWeight: 'bold' }}>
+                            <div className="order-item">
+                                <span>總計</span>
+                                <span style={{ color: '#6B4423', fontSize: '18px' }}>${order.total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {order.notes && (
+                        <div style={{ marginTop: '10px', padding: '10px', background: '#fef3c7', borderRadius: '5px', fontSize: '14px' }}>
+                            <strong>備註:</strong> {order.notes}
+                        </div>
+                    )}
+
+                    {onUpdateOrder && order.status !== 'completed' && order.status !== 'cancelled' && (
+                        <div className="admin-actions">
+                            {order.status === 'pending' && (
+                                <>
+                                    <button
+                                        className="btn btn-success"
+                                        onClick={() => handleStatusChange('accepted')}
+                                    >
+                                        接受訂單
+                                    </button>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => handleStatusChange('cancelled')}
+                                    >
+                                        拒絕訂單
+                                    </button>
+                                </>
+                            )}
+                            {order.status === 'accepted' && (
+                                <button
+                                    className="btn btn-success"
+                                    onClick={() => handleStatusChange('completed')}
+                                >
+                                    完成訂單
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // 菜單管理組件
+        function MenuManagement({ menu, onUpdateMenu }) {
+            const [editingItem, setEditingItem] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [filter, setFilter] = useState('all');
+
+            const categories = {
+                all: '全部',
+                highlight: '小店精選',
+                fried: '各式炸物',
+                bento: '便當/蓋飯',
+                drinks: '飲料'
+            };
+
+            const filteredMenu = filter === 'all'
+                ? menu
+                : menu.filter(item => item.category === filter);
+
+            const handleSaveItem = (item) => {
+                const updatedMenu = editingItem.id
+                    ? menu.map(m => m.id === item.id ? item : m)
+                    : [...menu, { ...item, id: Date.now() }];
+
+                onUpdateMenu(updatedMenu);
+                setShowModal(false);
+                setEditingItem(null);
+            };
+
+            const handleDeleteItem = (id) => {
+                if (confirm('確定要刪除這個菜單項目嗎？')) {
+                    onUpdateMenu(menu.filter(item => item.id !== id));
+                }
+            };
+
+            const handleToggleAvailability = (id) => {
+                const updatedMenu = menu.map(item =>
+                    item.id === id ? { ...item, available: !item.available } : item
+                );
+                onUpdateMenu(updatedMenu);
+            };
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            {Object.entries(categories).map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    className={`btn ${filter === key ? 'btn-primary' : 'btn-secondary'}`}
+                                    onClick={() => setFilter(key)}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            className="btn btn-success"
+                            onClick={() => {
+                                setEditingItem({
+                                    name: '',
+                                    englishName: '',
+                                    price: 0,
+                                    category: 'highlight',
+                                    emoji: '🍱',
+                                    image: '',
+                                    description: '',
+                                    available: true,
+                                    options: []
+                                });
+                                setShowModal(true);
+                            }}
+                        >
+                            ➕ 新增菜單
+                        </button>
+                    </div>
+
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>分類</th>
+                                <th>價格</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredMenu.map(item => (
+                                <tr key={item.id}>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <span style={{ fontSize: '24px' }}>{item.emoji}</span>
+                                            <div>
+                                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
+                                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                                    {item.englishName}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{categories[item.category]}</td>
+                                    <td style={{ fontWeight: 'bold', color: '#6B4423' }}>
+                                        ${item.price.toFixed(2)}
+                                    </td>
+                                    <td>
+                                        <label className="toggle-switch">
+                                            <input
+                                                type="checkbox"
+                                                checked={item.available !== false}
+                                                onChange={() => handleToggleAvailability(item.id)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                        <span style={{ marginLeft: '10px', fontSize: '13px' }}>
+                                            {item.available !== false ? '供應中' : '已售罄'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                            <button
+                                                className="btn btn-secondary"
+                                                style={{ padding: '5px 10px', fontSize: '14px' }}
+                                                onClick={() => {
+                                                    setEditingItem(item);
+                                                    setShowModal(true);
+                                                }}
+                                            >
+                                                編輯
+                                            </button>
+                                            <button
+                                                className="btn btn-danger"
+                                                style={{ padding: '5px 10px', fontSize: '14px' }}
+                                                onClick={() => handleDeleteItem(item.id)}
+                                            >
+                                                刪除
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {showModal && (
+                        <MenuItemModal
+                            item={editingItem}
+                            onSave={handleSaveItem}
+                            onClose={() => {
+                                setShowModal(false);
+                                setEditingItem(null);
+                            }}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // 菜單項目編輯 Modal
+        function MenuItemModal({ item, onSave, onClose }) {
+            const [formData, setFormData] = useState(item);
+
+            const handleChange = (field, value) => {
+                setFormData({ ...formData, [field]: value });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            {item.id ? '編輯菜單項目' : '新增菜單項目'}
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-group">
+                                <label>中文名稱 *</label>
+                                <input
+                                    type="text"
+                                    value={formData.name}
+                                    onChange={(e) => handleChange('name', e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>英文名稱</label>
+                                <input
+                                    type="text"
+                                    value={formData.englishName}
+                                    onChange={(e) => handleChange('englishName', e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>價格 *</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.price}
+                                    onChange={(e) => handleChange('price', parseFloat(e.target.value))}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>分類 *</label>
+                                <select
+                                    value={formData.category}
+                                    onChange={(e) => handleChange('category', e.target.value)}
+                                    required
+                                >
+                                    <option value="highlight">小店精選</option>
+                                    <option value="fried">各式炸物</option>
+                                    <option value="bento">便當/蓋飯</option>
+                                    <option value="drinks">飲料</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>圖示 Emoji</label>
+                                <input
+                                    type="text"
+                                    value={formData.emoji}
+                                    onChange={(e) => handleChange('emoji', e.target.value)}
+                                    placeholder="🍱"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>圖片網址</label>
+                                <input
+                                    type="text"
+                                    value={formData.image}
+                                    onChange={(e) => handleChange('image', e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>描述</label>
+                                <textarea
+                                    value={formData.description}
+                                    onChange={(e) => handleChange('description', e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group-inline">
+                                <label className="toggle-switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.available !== false}
+                                        onChange={(e) => handleChange('available', e.target.checked)}
+                                    />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                                <label>供應中</label>
+                            </div>
+                            <div className="btn-group">
+                                <button type="button" className="btn btn-secondary" onClick={onClose}>
+                                    取消
+                                </button>
+                                <button type="submit" className="btn btn-primary">
+                                    儲存
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // 統計報表組件
+        function Statistics({ orders, menu }) {
+            const today = new Date().toDateString();
+            const todayOrders = orders.filter(order =>
+                new Date(order.timestamp).toDateString() === today
+            );
+
+            // 計算各商品銷售統計
+            const itemStats = {};
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    if (!itemStats[item.name]) {
+                        itemStats[item.name] = {
+                            name: item.name,
+                            quantity: 0,
+                            revenue: 0
+                        };
+                    }
+                    itemStats[item.name].quantity += item.quantity;
+                    itemStats[item.name].revenue += item.price * item.quantity;
+                });
+            });
+
+            const sortedItems = Object.values(itemStats).sort((a, b) => b.revenue - a.revenue);
+
+            // 按日期統計
+            const dateStats = {};
+            orders.forEach(order => {
+                const date = new Date(order.timestamp).toLocaleDateString('zh-TW');
+                if (!dateStats[date]) {
+                    dateStats[date] = {
+                        date,
+                        orderCount: 0,
+                        revenue: 0
+                    };
+                }
+                dateStats[date].orderCount++;
+                dateStats[date].revenue += order.total;
+            });
+
+            const sortedDates = Object.values(dateStats).sort((a, b) =>
+                new Date(b.date) - new Date(a.date)
+            ).slice(0, 30); // 最近30天
+
+            return (
+                <div>
+                    <h3 style={{ marginBottom: '20px', color: '#6B4423' }}>📈 今日統計</h3>
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-label">今日訂單</div>
+                            <div className="stat-value">{todayOrders.length}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">今日營業額</div>
+                            <div className="stat-value">
+                                ${todayOrders.reduce((sum, o) => sum + o.total, 0).toFixed(2)}
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">總訂單數</div>
+                            <div className="stat-value">{orders.length}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">總營業額</div>
+                            <div className="stat-value">
+                                ${orders.reduce((sum, o) => sum + o.total, 0).toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style={{ marginTop: '40px', marginBottom: '15px', color: '#6B4423' }}>
+                        🏆 熱銷商品排行
+                    </h3>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>商品名稱</th>
+                                <th>銷售數量</th>
+                                <th>銷售金額</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedItems.slice(0, 10).map((item, index) => (
+                                <tr key={item.name}>
+                                    <td>
+                                        <span style={{
+                                            fontSize: '20px',
+                                            fontWeight: 'bold',
+                                            color: index === 0 ? '#fbbf24' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7f32' : '#666'
+                                        }}>
+                                            {index + 1}
+                                        </span>
+                                    </td>
+                                    <td style={{ fontWeight: 'bold' }}>{item.name}</td>
+                                    <td>{item.quantity}</td>
+                                    <td style={{ color: '#6B4423', fontWeight: 'bold' }}>
+                                        ${item.revenue.toFixed(2)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <h3 style={{ marginTop: '40px', marginBottom: '15px', color: '#6B4423' }}>
+                        📅 每日營業統計
+                    </h3>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>日期</th>
+                                <th>訂單數</th>
+                                <th>營業額</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedDates.map(stat => (
+                                <tr key={stat.date}>
+                                    <td>{stat.date}</td>
+                                    <td>{stat.orderCount}</td>
+                                    <td style={{ color: '#6B4423', fontWeight: 'bold' }}>
+                                        ${stat.revenue.toFixed(2)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        // 主應用程式
+        function AdminApp() {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [orders, setOrders] = useState([]);
+            const [menu, setMenu] = useState([]);
+
+            // 載入數據
+            useEffect(() => {
+                const loadedOrders = loadFromLocalStorage('orders', []);
+                const loadedMenu = loadFromLocalStorage('menu', []);
+                setOrders(loadedOrders);
+                setMenu(loadedMenu);
+            }, []);
+
+            // 監聽 localStorage 變化
+            useEffect(() => {
+                const handleStorageChange = () => {
+                    setOrders(loadFromLocalStorage('orders', []));
+                    setMenu(loadFromLocalStorage('menu', []));
+                };
+
+                window.addEventListener('storage', handleStorageChange);
+
+                // 定期更新數據（每5秒）
+                const interval = setInterval(handleStorageChange, 5000);
+
+                return () => {
+                    window.removeEventListener('storage', handleStorageChange);
+                    clearInterval(interval);
+                };
+            }, []);
+
+            const handleLogin = () => {
+                setIsLoggedIn(true);
+            };
+
+            const handleLogout = () => {
+                setIsLoggedIn(false);
+                setCurrentView('dashboard');
+            };
+
+            const handleUpdateOrder = (orderId, updatedOrder) => {
+                const updatedOrders = orders.map(order =>
+                    order.id === orderId ? updatedOrder : order
+                );
+                setOrders(updatedOrders);
+                saveToLocalStorage('orders', updatedOrders);
+            };
+
+            const handleUpdateMenu = (updatedMenu) => {
+                setMenu(updatedMenu);
+                saveToLocalStorage('menu', updatedMenu);
+            };
+
+            if (!isLoggedIn) {
+                return <AdminLogin onLogin={handleLogin} />;
+            }
+
+            const menuItems = [
+                { id: 'dashboard', icon: '📊', label: '儀表板' },
+                { id: 'orders', icon: '📦', label: '訂單管理' },
+                { id: 'menu', icon: '🍱', label: '菜單管理' },
+                { id: 'statistics', icon: '📈', label: '統計報表' }
+            ];
+
+            const viewTitles = {
+                dashboard: '儀表板',
+                orders: '訂單管理',
+                menu: '菜單管理',
+                statistics: '統計報表'
+            };
+
+            const viewDescriptions = {
+                dashboard: '即時訂單監控與今日統計',
+                orders: '管理所有訂單狀態',
+                menu: '編輯菜單項目與供應狀態',
+                statistics: '查看營收與銷售統計'
+            };
+
+            return (
+                <div className="admin-container">
+                    <div className="admin-layout">
+                        <aside className="sidebar">
+                            <div className="sidebar-header">
+                                <h1>🍱 後台管理</h1>
+                                <p>Lee's Taiwanese Comfort Food</p>
+                            </div>
+                            <ul className="sidebar-menu">
+                                {menuItems.map(item => (
+                                    <li key={item.id}>
+                                        <button
+                                            className={currentView === item.id ? 'active' : ''}
+                                            onClick={() => setCurrentView(item.id)}
+                                        >
+                                            <span>{item.icon}</span>
+                                            <span>{item.label}</span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="sidebar-footer">
+                                <button onClick={handleLogout}>
+                                    🚪 登出
+                                </button>
+                            </div>
+                        </aside>
+
+                        <main className="main-content">
+                            <div className="content-header">
+                                <h2>{viewTitles[currentView]}</h2>
+                                <p>{viewDescriptions[currentView]}</p>
+                            </div>
+                            <div className="content-body">
+                                {currentView === 'dashboard' && (
+                                    <Dashboard orders={orders} menu={menu} />
+                                )}
+                                {currentView === 'orders' && (
+                                    <OrderManagement
+                                        orders={orders}
+                                        onUpdateOrder={handleUpdateOrder}
+                                    />
+                                )}
+                                {currentView === 'menu' && (
+                                    <MenuManagement
+                                        menu={menu}
+                                        onUpdateMenu={handleUpdateMenu}
+                                    />
+                                )}
+                                {currentView === 'statistics' && (
+                                    <Statistics orders={orders} menu={menu} />
+                                )}
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+
+        // 渲染應用程式
+        ReactDOM.render(<AdminApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
