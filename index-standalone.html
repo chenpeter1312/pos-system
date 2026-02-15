@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店內點餐系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .menu-section,
+        .cart-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .quantity {
+            display: inline-block;
+            margin: 0 10px;
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #333;
+            text-align: right;
+        }
+
+        .total h3 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #2196F3;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>店內點餐系統</h1>
+
+        <div class="container">
+            <!-- 左側：菜單 -->
+            <div class="menu-section">
+                <h2>菜單</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>品項</th>
+                            <th>價格</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menuTable">
+                        <!-- 菜單項目將由 JavaScript 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 右側：購物車 -->
+            <div class="cart-section">
+                <h2>購物車</h2>
+                <div id="cartContent">
+                    <p class="empty-cart">購物車是空的</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜單資料
+        const menu = [
+            { id: 1, name: '招牌牛排', price: 380 },
+            { id: 2, name: '炸雞排', price: 180 },
+            { id: 3, name: '義大利麵', price: 220 },
+            { id: 4, name: '凱薩沙拉', price: 150 },
+            { id: 5, name: '薯條', price: 80 },
+            { id: 6, name: '可樂', price: 50 },
+            { id: 7, name: '咖啡', price: 90 },
+            { id: 8, name: '提拉米蘇', price: 120 }
+        ];
+
+        // 購物車狀態
+        let cart = [];
+
+        // 渲染菜單
+        function renderMenu() {
+            const menuTable = document.getElementById('menuTable');
+            menuTable.innerHTML = menu.map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>$${item.price}</td>
+                    <td>
+                        <button onclick="addToCart(${item.id})">加入</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 加入購物車
+        function addToCart(productId) {
+            const product = menu.find(item => item.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                // 已存在，數量 +1
+                existingItem.quantity += 1;
+            } else {
+                // 新增品項
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            renderCart();
+        }
+
+        // 增加數量
+        function increaseQuantity(productId) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity += 1;
+                renderCart();
+            }
+        }
+
+        // 減少數量
+        function decreaseQuantity(productId) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                if (item.quantity === 1) {
+                    // 數量為 1 時，移除項目
+                    cart = cart.filter(item => item.id !== productId);
+                } else {
+                    // 數量 -1
+                    item.quantity -= 1;
+                }
+                renderCart();
+            }
+        }
+
+        // 計算總金額
+        function calculateTotal() {
+            return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // 渲染購物車
+        function renderCart() {
+            const cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = '<p class="empty-cart">購物車是空的</p>';
+                return;
+            }
+
+            const total = calculateTotal();
+
+            cartContent.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>品項</th>
+                            <th>單價</th>
+                            <th>數量</th>
+                            <th>小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${cart.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>$${item.price}</td>
+                                <td>
+                                    <button onclick="decreaseQuantity(${item.id})">-</button>
+                                    <span class="quantity">${item.quantity}</span>
+                                    <button onclick="increaseQuantity(${item.id})">+</button>
+                                </td>
+                                <td>$${item.price * item.quantity}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="total">
+                    <h3>總金額：$${total}</h3>
+                </div>
+
+                <button class="submit-btn" onclick="submitOrder()">送出訂單</button>
+            `;
+        }
+
+        // 送出訂單
+        function submitOrder() {
+            const total = calculateTotal();
+            alert(`訂單已送出！\n總金額：$${total}`);
+            cart = [];
+            renderCart();
+        }
+
+        // 初始化
+        renderMenu();
+        renderCart();
+    </script>
+</body>
+</html>

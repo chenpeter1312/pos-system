@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>德州店內點餐系統 V2 - 可改名稱與價格</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .menu-section,
+        .cart-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.delete-btn {
+            background-color: #f44336;
+        }
+
+        button.delete-btn:hover {
+            background-color: #da190b;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 200px;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            text-align: right;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .checkout-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 2px solid #333;
+        }
+
+        .checkout-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .checkout-row.subtotal {
+            font-weight: 600;
+        }
+
+        .checkout-row.tax {
+            color: #666;
+        }
+
+        .checkout-row.total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            border-top: 2px solid #333;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #2196F3;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+        }
+
+        .price-input {
+            width: 90px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .name-input {
+            width: 100%;
+            max-width: 250px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .name-input:focus,
+        .price-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .label-tax {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .custom-item-badge {
+            display: inline-block;
+            background-color: #ff9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // 德州銷售稅率
+        const TEXAS_TAX_RATE = 0.0825; // 8.25%
+
+        function App() {
+            // 菜單資料（加入自定義品項）
+            const menu = [
+                { id: 1, name: 'Texas Ribeye Steak', price: 38.00 },
+                { id: 2, name: 'BBQ Brisket', price: 28.00 },
+                { id: 3, name: 'Chicken Fried Steak', price: 22.00 },
+                { id: 4, name: 'Pulled Pork Sandwich', price: 15.00 },
+                { id: 5, name: 'Mac & Cheese', price: 8.00 },
+                { id: 6, name: 'Coleslaw', price: 6.00 },
+                { id: 7, name: 'Sweet Tea', price: 3.50 },
+                { id: 8, name: 'Pecan Pie', price: 9.00 },
+                { id: 999, name: '自定義品項', price: 0.00 } // 特殊自定義品項
+            ];
+
+            // 購物車狀態
+            const [cart, setCart] = useState([]);
+            const [customIdCounter, setCustomIdCounter] = useState(1000);
+
+            // 加入購物車
+            const addToCart = (product) => {
+                // 如果是自定義品項，每次都創建新的
+                if (product.id === 999) {
+                    setCart([...cart, {
+                        id: customIdCounter,
+                        name: '自定義品項',
+                        price: product.price,
+                        quantity: 1,
+                        customPrice: product.price,
+                        customName: '自定義品項',
+                        isCustom: true
+                    }]);
+                    setCustomIdCounter(customIdCounter + 1);
+                } else {
+                    const existingItem = cart.find(item => item.id === product.id);
+
+                    if (existingItem) {
+                        // 已存在，數量 +1
+                        setCart(cart.map(item =>
+                            item.id === product.id
+                                ? { ...item, quantity: item.quantity + 1 }
+                                : item
+                        ));
+                    } else {
+                        // 新增品項
+                        setCart([...cart, {
+                            ...product,
+                            quantity: 1,
+                            customPrice: product.price,
+                            customName: product.name,
+                            isCustom: false
+                        }]);
+                    }
+                }
+            };
+
+            // 增加數量
+            const increaseQuantity = (id) => {
+                setCart(cart.map(item =>
+                    item.id === id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                ));
+            };
+
+            // 減少數量
+            const decreaseQuantity = (id) => {
+                const item = cart.find(item => item.id === id);
+
+                if (item.quantity === 1) {
+                    // 數量為 1 時，移除項目
+                    setCart(cart.filter(item => item.id !== id));
+                } else {
+                    // 數量 -1
+                    setCart(cart.map(item =>
+                        item.id === id
+                            ? { ...item, quantity: item.quantity - 1 }
+                            : item
+                    ));
+                }
+            };
+
+            // 更新自定義名稱（新功能）
+            const updateCustomName = (id, newName) => {
+                setCart(cart.map(item =>
+                    item.id === id
+                        ? { ...item, customName: newName }
+                        : item
+                ));
+            };
+
+            // 更新自定義價格
+            const updateCustomPrice = (id, newPrice) => {
+                const price = parseFloat(newPrice);
+                if (!isNaN(price) && price >= 0) {
+                    setCart(cart.map(item =>
+                        item.id === id
+                            ? { ...item, customPrice: price }
+                            : item
+                    ));
+                }
+            };
+
+            // 移除品項
+            const removeItem = (id) => {
+                setCart(cart.filter(item => item.id !== id));
+            };
+
+            // 計算 Subtotal
+            const calculateSubtotal = () => {
+                return cart.reduce((sum, item) => {
+                    return sum + (item.customPrice * item.quantity);
+                }, 0);
+            };
+
+            // 計算 Tax
+            const calculateTax = () => {
+                const subtotal = calculateSubtotal();
+                return subtotal * TEXAS_TAX_RATE;
+            };
+
+            // 計算 Total
+            const calculateTotal = () => {
+                return calculateSubtotal() + calculateTax();
+            };
+
+            // 送出訂單
+            const submitOrder = () => {
+                const subtotal = calculateSubtotal();
+                const tax = calculateTax();
+                const total = calculateTotal();
+
+                const order = {
+                    timestamp: new Date().toISOString(),
+                    items: cart.map(item => ({
+                        id: item.id,
+                        originalName: item.name,
+                        customName: item.customName,  // 修改後的名稱
+                        originalPrice: item.price,
+                        customPrice: item.customPrice,
+                        quantity: item.quantity,
+                        subtotal: item.customPrice * item.quantity,
+                        isCustomItem: item.isCustom || false
+                    })),
+                    subtotal: subtotal,
+                    taxRate: TEXAS_TAX_RATE,
+                    tax: tax,
+                    total: total
+                };
+
+                console.log('📋 訂單 JSON:', JSON.stringify(order, null, 2));
+
+                // 建立收據文字（使用修改後的名稱）
+                const receiptText = `
+🧾 德州點餐收據
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${cart.map(item =>
+    `${item.customName}\n  $${item.customPrice.toFixed(2)} × ${item.quantity} = $${(item.customPrice * item.quantity).toFixed(2)}`
+).join('\n\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Subtotal:            $${subtotal.toFixed(2)}
+Tax (8.25%):          $${tax.toFixed(2)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total:               $${total.toFixed(2)}
+
+時間: ${new Date().toLocaleString()}
+                `.trim();
+
+                alert(receiptText);
+                setCart([]);
+            };
+
+            return (
+                <div className="app">
+                    <h1>🤠 德州店內點餐系統 V2 - 可改名稱與價格 (TX Tax: 8.25%)</h1>
+
+                    <div className="container">
+                        {/* 左側：菜單 */}
+                        <div className="menu-section">
+                            <h2>菜單</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>品項</th>
+                                        <th>原價</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {menu.map(item => (
+                                        <tr key={item.id}>
+                                            <td>
+                                                {item.name}
+                                                {item.id === 999 && (
+                                                    <span className="custom-item-badge">可自訂</span>
+                                                )}
+                                            </td>
+                                            <td>${item.price.toFixed(2)}</td>
+                                            <td>
+                                                <button onClick={() => addToCart(item)}>
+                                                    加入
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 右側：購物車 */}
+                        <div className="cart-section">
+                            <h2>購物車 (名稱與價格皆可編輯)</h2>
+
+                            {cart.length === 0 ? (
+                                <p className="empty-cart">購物車是空的</p>
+                            ) : (
+                                <>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>品項名稱</th>
+                                                <th>單價</th>
+                                                <th>數量</th>
+                                                <th>小計</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {cart.map(item => (
+                                                <tr key={item.id}>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            className="name-input"
+                                                            value={item.customName}
+                                                            onChange={(e) => updateCustomName(item.id, e.target.value)}
+                                                            placeholder="輸入品項名稱"
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="number"
+                                                            className="price-input"
+                                                            value={item.customPrice}
+                                                            onChange={(e) => updateCustomPrice(item.id, e.target.value)}
+                                                            step="0.01"
+                                                            min="0"
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div className="quantity-control">
+                                                            <button onClick={() => decreaseQuantity(item.id)}>
+                                                                -
+                                                            </button>
+                                                            <span className="quantity">{item.quantity}</span>
+                                                            <button onClick={() => increaseQuantity(item.id)}>
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td>${(item.customPrice * item.quantity).toFixed(2)}</td>
+                                                    <td>
+                                                        <button
+                                                            className="delete-btn"
+                                                            onClick={() => removeItem(item.id)}>
+                                                            刪除
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    {/* 結帳區 */}
+                                    <div className="checkout-section">
+                                        <div className="checkout-row subtotal">
+                                            <span>Subtotal:</span>
+                                            <span>${calculateSubtotal().toFixed(2)}</span>
+                                        </div>
+                                        <div className="checkout-row tax">
+                                            <span className="label-tax">Tax (8.25%):</span>
+                                            <span>${calculateTax().toFixed(2)}</span>
+                                        </div>
+                                        <div className="checkout-row total">
+                                            <span>Total:</span>
+                                            <span>${calculateTotal().toFixed(2)}</span>
+                                        </div>
+                                    </div>
+
+                                    <button className="submit-btn" onClick={submitOrder}>
+                                        💳 結帳（顯示收據）
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // 渲染應用
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
