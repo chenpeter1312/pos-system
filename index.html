@@ -9,6 +9,20 @@
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
+        /* 台灣餐廳木質風格配色 */
+        :root {
+            --wood-dark: #6B4423;
+            --wood-medium: #8B6F47;
+            --wood-light: #D4A574;
+            --cream: #FFF8E7;
+            --cream-dark: #F5E6D3;
+            --taiwan-red: #C1272D;
+            --taiwan-green: #2F5233;
+            --warm-white: #FFFEF9;
+            --text-dark: #3E2723;
+            --text-medium: #5D4037;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,30 +31,50 @@
 
         body {
             font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* 木質紋理背景 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(107, 68, 35, 0.03) 2px, rgba(107, 68, 35, 0.03) 4px),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(107, 68, 35, 0.02) 2px, rgba(107, 68, 35, 0.02) 4px);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .app {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
-            background: white;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
             padding: 20px 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 2px solid rgba(139, 111, 71, 0.1);
         }
 
         .header h1 {
-            color: #667eea;
+            color: var(--wood-dark);
             font-size: 28px;
+            text-shadow: 0 1px 2px rgba(107, 68, 35, 0.1);
         }
 
         .tab-buttons {
@@ -50,31 +84,35 @@
 
         .tab-btn {
             padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
+            border: 2px solid var(--wood-light);
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             transition: all 0.3s;
-            background: #e0e7ff;
-            color: #667eea;
+            background: var(--cream);
+            color: var(--wood-dark);
+            font-weight: 600;
         }
 
         .tab-btn.active {
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+            color: var(--warm-white);
+            border-color: var(--wood-dark);
         }
 
         .tab-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
+            border-color: var(--wood-medium);
         }
 
         .content {
-            background: white;
-            border-radius: 10px;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.15);
             min-height: 600px;
+            border: 2px solid rgba(139, 111, 71, 0.1);
         }
 
         .menu-grid {
@@ -85,39 +123,43 @@
         }
 
         .menu-item {
-            border: 2px solid #e0e7ff;
-            border-radius: 10px;
+            border: 2px solid var(--wood-light);
+            border-radius: 12px;
             padding: 20px;
             transition: all 0.3s;
             cursor: pointer;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.1);
         }
 
         .menu-item:hover {
-            border-color: #667eea;
+            border-color: var(--wood-medium);
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(107, 68, 35, 0.2);
         }
 
         .menu-item-image {
             width: 100%;
             height: 150px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
+            background: linear-gradient(135deg, var(--wood-light) 0%, var(--wood-medium) 100%);
+            border-radius: 10px;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 60px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .menu-item h3 {
-            color: #333;
+            color: var(--text-dark);
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .menu-item-price {
             font-size: 24px;
-            color: #667eea;
+            color: var(--taiwan-red);
             font-weight: bold;
             margin-bottom: 15px;
         }
@@ -133,18 +175,20 @@
         .quantity-btn {
             width: 35px;
             height: 35px;
-            border: none;
+            border: 2px solid var(--wood-medium);
             border-radius: 50%;
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+            color: var(--warm-white);
             font-size: 20px;
             cursor: pointer;
             transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(107, 68, 35, 0.2);
         }
 
         .quantity-btn:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood-medium) 100%);
             transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
         }
 
         .quantity-display {
@@ -173,19 +217,21 @@
 
         .checkout-btn {
             padding: 15px 40px;
-            background: #667eea;
+            background: linear-gradient(135deg, var(--taiwan-red) 0%, #A01F23 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(193, 39, 45, 0.3);
         }
 
         .checkout-btn:hover {
-            background: #5568d3;
+            background: linear-gradient(135deg, #A01F23 0%, var(--taiwan-red) 100%);
             transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(193, 39, 45, 0.4);
         }
 
         .modal {
@@ -202,20 +248,22 @@
         }
 
         .modal-content {
-            background: white;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 12px;
             max-width: 800px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
+            border: 2px solid var(--wood-light);
+            box-shadow: 0 8px 32px rgba(107, 68, 35, 0.25);
         }
 
         .modal-header {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
-            color: #667eea;
+            color: var(--wood-dark);
         }
 
         .form-group {
@@ -261,18 +309,36 @@
         }
 
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background: linear-gradient(135deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+            color: var(--warm-white);
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood-medium) 100%);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
         }
 
         .btn-secondary {
-            background: #e0e7ff;
-            color: #667eea;
+            background: var(--cream);
+            color: var(--wood-dark);
+            border: 2px solid var(--wood-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cream-dark);
+            border-color: var(--wood-medium);
         }
 
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, var(--taiwan-red) 0%, #A01F23 100%);
             color: white;
+            box-shadow: 0 2px 8px rgba(193, 39, 45, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #A01F23 0%, var(--taiwan-red) 100%);
+            box-shadow: 0 4px 12px rgba(193, 39, 45, 0.3);
         }
 
         .btn:hover {
@@ -281,16 +347,19 @@
         }
 
         .order-card {
-            border: 2px solid #e0e7ff;
-            border-radius: 10px;
+            border: 2px solid var(--wood-light);
+            border-radius: 12px;
             padding: 20px;
             margin-bottom: 15px;
             transition: all 0.3s;
+            background: linear-gradient(135deg, var(--warm-white) 0%, var(--cream) 100%);
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.1);
         }
 
         .order-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--wood-medium);
+            box-shadow: 0 6px 16px rgba(107, 68, 35, 0.2);
+            transform: translateY(-2px);
         }
 
         .order-header {
@@ -303,7 +372,7 @@
         .order-number {
             font-size: 20px;
             font-weight: bold;
-            color: #667eea;
+            color: var(--wood-dark);
         }
 
         .order-status {
@@ -354,11 +423,12 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8B6F47 0%, #6B4423 100%);
             color: white;
             padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.25);
+            border: 2px solid rgba(212, 165, 116, 0.3);
         }
 
         .stat-label {
@@ -394,7 +464,7 @@
         .table th {
             background: #f9fafb;
             font-weight: bold;
-            color: #667eea;
+            color: var(--wood-dark);
         }
 
         .table tr:hover {
@@ -423,7 +493,7 @@
 
         .login-title {
             text-align: center;
-            color: #667eea;
+            color: var(--wood-dark);
             margin-bottom: 30px;
             font-size: 28px;
         }
@@ -442,7 +512,7 @@
 
         .search-bar input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--wood-medium);
         }
 
         /* 售罄商品容器 */
@@ -1359,11 +1429,11 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: #2d5016;
+            background: linear-gradient(135deg, #C1272D 0%, #A01F23 100%);
             color: white;
             padding: 16px 24px;
             border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 16px rgba(193, 39, 45, 0.4);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1372,12 +1442,13 @@
             font-weight: 600;
             z-index: 100;
             transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         .cart-float-button:hover {
-            background: #1f3a0f;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #A01F23 0%, #C1272D 100%);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(193, 39, 45, 0.5);
         }
 
         .cart-count-badge {
@@ -1638,7 +1709,7 @@
                 right: 16px !important;
                 padding: 14px 24px !important;
                 font-size: 16px !important;
-                box-shadow: 0 4px 20px rgba(45, 80, 22, 0.4) !important;
+                box-shadow: 0 4px 20px rgba(193, 39, 45, 0.5) !important;
                 min-height: 56px !important;
                 z-index: 1000 !important;
             }
@@ -3728,7 +3799,7 @@
             // 渲染查詢訂單
             const renderOrdersView = () => (
                 <div>
-                    <h2 style={{ marginBottom: '20px', color: '#667eea' }}>🔍 查詢訂單</h2>
+                    <h2 style={{ marginBottom: '20px', color: '#6B4423' }}>🔍 查詢訂單</h2>
                     <div className="search-bar">
                         <input
                             type="text"
@@ -3773,12 +3844,12 @@
                                     <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '10px', paddingTop: '10px' }}>
                                         <div className="order-item">
                                             <strong>總計：</strong>
-                                            <strong style={{ color: '#667eea' }}>${order.total.toFixed(2)}</strong>
+                                            <strong style={{ color: '#6B4423' }}>${order.total.toFixed(2)}</strong>
                                         </div>
                                         {order.paymentMethod && (
                                             <div className="order-item" style={{ marginTop: '8px', fontSize: '14px' }}>
                                                 <span style={{ color: '#6b7280' }}>💳 付款方式：</span>
-                                                <span style={{ fontWeight: '600', color: '#667eea' }}>{order.paymentMethod}</span>
+                                                <span style={{ fontWeight: '600', color: '#6B4423' }}>{order.paymentMethod}</span>
                                             </div>
                                         )}
                                         {order.paymentStatus && (
@@ -3805,7 +3876,7 @@
                 const historyOrders = get30DaysOrders();
                 return (
                     <div>
-                        <h2 style={{ marginBottom: '20px', color: '#667eea' }}>📜 歷史記錄（30天內）</h2>
+                        <h2 style={{ marginBottom: '20px', color: '#6B4423' }}>📜 歷史記錄（30天內）</h2>
                         {historyOrders.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-state-icon">📋</div>
@@ -3861,7 +3932,7 @@
                 return (
                     <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                            <h2 style={{ color: '#667eea' }}>📊 管理後台</h2>
+                            <h2 style={{ color: '#6B4423' }}>📊 管理後台</h2>
                             <button className="btn btn-secondary" onClick={() => {
                                 setIsAdminLoggedIn(false);
                                 setCurrentView('customer');
@@ -3889,7 +3960,7 @@
                             </div>
                         </div>
 
-                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#667eea' }}>🔔 待處理訂單</h3>
+                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#6B4423' }}>🔔 待處理訂單</h3>
                         {pendingOrders.length === 0 ? (
                             <p style={{ color: '#9ca3af' }}>目前沒有待處理訂單</p>
                         ) : (
@@ -3923,7 +3994,7 @@
                             ))
                         )}
 
-                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#667eea' }}>📈 銷售報表</h3>
+                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#6B4423' }}>📈 銷售報表</h3>
                         <div style={{ background: '#f9fafb', padding: '20px', borderRadius: '12px', border: '1px solid #e5e7eb', marginBottom: '20px' }}>
                             {/* Date Selector */}
                             <div style={{ marginBottom: '20px' }}>
@@ -4038,7 +4109,7 @@
                                                                 marginBottom: '8px',
                                                                 fontSize: '13px'
                                                             }}>
-                                                                <span style={{ fontWeight: '600', color: '#667eea' }}>{order.orderNumber}</span>
+                                                                <span style={{ fontWeight: '600', color: '#6B4423' }}>{order.orderNumber}</span>
                                                                 <span style={{ color: '#6b7280' }}>
                                                                     {new Date(order.createdAt).toLocaleTimeString('zh-TW', {
                                                                         hour: '2-digit',
@@ -4073,7 +4144,7 @@
                                                                 </div>
                                                                 <div style={{ textAlign: 'right' }}>
                                                                     <div style={{ color: '#9ca3af', marginBottom: '2px' }}>Total</div>
-                                                                    <div style={{ color: '#667eea', fontWeight: '700' }}>${(order.total || 0).toFixed(2)}</div>
+                                                                    <div style={{ color: '#6B4423', fontWeight: '700' }}>${(order.total || 0).toFixed(2)}</div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -4097,7 +4168,7 @@
                             })()}
                         </div>
 
-                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#667eea' }}>🍽️ 菜單管理</h3>
+                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#6B4423' }}>🍽️ 菜單管理</h3>
 
                         {/* 搜索和过滤器 */}
                         <div style={{
@@ -4237,7 +4308,7 @@
                             </tbody>
                         </table>
 
-                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#667eea' }}>📈 今日銷售排行</h3>
+                        <h3 style={{ marginTop: '30px', marginBottom: '15px', color: '#6B4423' }}>📈 今日銷售排行</h3>
                         {itemStats.length === 0 ? (
                             <p style={{ color: '#9ca3af' }}>今日尚無銷售記錄</p>
                         ) : (
@@ -4287,7 +4358,8 @@
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'linear-gradient(135deg, #D4A574 0%, #8B6F47 50%, #6B4423 100%)',
+                            backgroundImage: 'linear-gradient(135deg, #D4A574 0%, #8B6F47 50%, #6B4423 100%), repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.05) 3px, rgba(255,255,255,0.05) 6px)',
                             zIndex: 9999,
                             display: 'flex',
                             flexDirection: 'column',
@@ -4367,14 +4439,15 @@
                                 >
                                     <div style={{
                                         fontSize: '48px',
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        background: 'linear-gradient(135deg, #C1272D 0%, #A01F23 100%)',
                                         borderRadius: '12px',
                                         width: '72px',
                                         height: '72px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        flexShrink: 0
+                                        flexShrink: 0,
+                                        boxShadow: '0 4px 12px rgba(193, 39, 45, 0.3)'
                                     }}>
                                         🍽️
                                     </div>
@@ -4423,14 +4496,15 @@
                                 >
                                     <div style={{
                                         fontSize: '48px',
-                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        background: 'linear-gradient(135deg, #2F5233 0%, #1e3a20 100%)',
                                         borderRadius: '12px',
                                         width: '72px',
                                         height: '72px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        flexShrink: 0
+                                        flexShrink: 0,
+                                        boxShadow: '0 4px 12px rgba(47, 82, 51, 0.3)'
                                     }}>
                                         🥡
                                     </div>
@@ -4509,14 +4583,15 @@
                                 >
                                     <div style={{
                                         fontSize: '48px',
-                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                        background: 'linear-gradient(135deg, #D4A574 0%, #8B6F47 100%)',
                                         borderRadius: '12px',
                                         width: '72px',
                                         height: '72px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        flexShrink: 0
+                                        flexShrink: 0,
+                                        boxShadow: '0 4px 12px rgba(212, 165, 116, 0.3)'
                                     }}>
                                         ⏰
                                     </div>
@@ -4883,9 +4958,10 @@
                                 <div style={{
                                     marginTop: '20px',
                                     padding: '20px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    background: 'linear-gradient(135deg, #8B6F47 0%, #6B4423 100%)',
                                     borderRadius: '12px',
-                                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                                    boxShadow: '0 4px 15px rgba(107, 68, 35, 0.3)',
+                                    border: '2px solid rgba(212, 165, 116, 0.3)'
                                 }}>
                                     <div style={{
                                         color: 'white',
