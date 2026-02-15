@@ -4009,18 +4009,6 @@
                         {renderCustomerView()}
                     </div>
 
-                    {currentView === 'customer' && cart.length > 0 && (
-                        <div className="cart-summary">
-                            <div className="cart-info">
-                                🛒 購物車：{cart.reduce((sum, item) => sum + item.quantity, 0)} 項 |
-                                總計：<strong>${calculateTotal().toFixed(2)}</strong>
-                            </div>
-                            <button className="checkout-btn" onClick={() => setShowCheckoutModal(true)}>
-                                結帳
-                            </button>
-                        </div>
-                    )}
-
                     {/* 結帳 Modal */}
                     {showCheckoutModal && (
                         <div className="modal" onClick={() => setShowCheckoutModal(false)}>
