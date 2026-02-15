@@ -561,6 +561,111 @@
             border-color: var(--wood-medium);
         }
 
+        /* 選項卡片樣式 */
+        .option-card {
+            background: var(--warm-white);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px var(--shadow-soft);
+        }
+
+        .option-card:hover {
+            border-color: var(--wood-light);
+            box-shadow: 0 4px 12px var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .option-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--wood-dark);
+        }
+
+        .option-type-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .badge-radio {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-checkbox {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .option-values-list {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .option-value-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .option-value-item:last-child {
+            border-bottom: none;
+        }
+
+        .option-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-value-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .option-value-input-group input {
+            flex: 1;
+        }
+
+        .option-value-input-group button {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .add-value-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--cream);
+            border: 2px dashed var(--wood-light);
+            color: var(--wood-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Lora', 'Noto Serif TC', serif;
+            font-size: 14px;
+        }
+
+        .add-value-btn:hover {
+            background: var(--cream-dark);
+            border-color: var(--wood-medium);
+        }
+
         /* 響應式設計 */
         @media (max-width: 768px) {
             .admin-layout {
@@ -1135,6 +1240,241 @@
             );
         }
 
+        // 附加選項管理組件
+        function OptionsManagement({ optionsLibrary, onUpdateOptionsLibrary }) {
+            const [showModal, setShowModal] = useState(false);
+            const [editingOption, setEditingOption] = useState(null);
+            const [currentOptionValues, setCurrentOptionValues] = useState([]);
+            const [formData, setFormData] = useState({
+                name: '',
+                type: 'radio'
+            });
+
+            const handleAddNewOption = () => {
+                setEditingOption(null);
+                setFormData({
+                    name: '',
+                    type: 'radio'
+                });
+                setCurrentOptionValues([{ label: '', price: 0 }]);
+                setShowModal(true);
+            };
+
+            const handleEditOption = (option) => {
+                setEditingOption(option);
+                setFormData({
+                    name: option.name,
+                    type: option.type
+                });
+                setCurrentOptionValues([...option.options]);
+                setShowModal(true);
+            };
+
+            const handleDeleteOption = (id) => {
+                if (confirm('確定要刪除這個選項嗎？')) {
+                    const updatedLibrary = optionsLibrary.filter(opt => opt.id !== id);
+                    onUpdateOptionsLibrary(updatedLibrary);
+                }
+            };
+
+            const handleSaveOption = () => {
+                if (!formData.name.trim()) {
+                    alert('請輸入選項名稱');
+                    return;
+                }
+
+                if (currentOptionValues.length === 0 || !currentOptionValues.every(v => v.label.trim())) {
+                    alert('請至少添加一個選項值並填寫完整');
+                    return;
+                }
+
+                const newOption = {
+                    id: editingOption ? editingOption.id : `opt-${Date.now()}`,
+                    name: formData.name,
+                    type: formData.type,
+                    options: currentOptionValues.map(v => ({
+                        label: v.label,
+                        price: parseFloat(v.price) || 0
+                    }))
+                };
+
+                let updatedLibrary;
+                if (editingOption) {
+                    updatedLibrary = optionsLibrary.map(opt =>
+                        opt.id === editingOption.id ? newOption : opt
+                    );
+                } else {
+                    updatedLibrary = [...optionsLibrary, newOption];
+                }
+
+                onUpdateOptionsLibrary(updatedLibrary);
+                setShowModal(false);
+            };
+
+            const handleAddOptionValue = () => {
+                setCurrentOptionValues([...currentOptionValues, { label: '', price: 0 }]);
+            };
+
+            const handleRemoveOptionValue = (index) => {
+                if (currentOptionValues.length > 1) {
+                    setCurrentOptionValues(currentOptionValues.filter((_, i) => i !== index));
+                }
+            };
+
+            const handleOptionValueChange = (index, field, value) => {
+                const updated = [...currentOptionValues];
+                updated[index][field] = value;
+                setCurrentOptionValues(updated);
+            };
+
+            return (
+                <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                        <div>
+                            <p style={{ color: '#666', fontSize: '14px' }}>
+                                管理可供選擇的附加選項，如辣度、飲料、大小等
+                            </p>
+                        </div>
+                        <button
+                            className="btn btn-success"
+                            onClick={handleAddNewOption}
+                        >
+                            ➕ 新增選項
+                        </button>
+                    </div>
+
+                    {optionsLibrary.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">📝</div>
+                            <p>目前沒有附加選項，點擊上方按鈕開始新增</p>
+                        </div>
+                    ) : (
+                        optionsLibrary.map(option => (
+                            <div key={option.id} className="option-card">
+                                <div className="option-header">
+                                    <div className="option-name">{option.name}</div>
+                                    <span className={`option-type-badge ${option.type === 'radio' ? 'badge-radio' : 'badge-checkbox'}`}>
+                                        {option.type === 'radio' ? '單選' : '多選'}
+                                    </span>
+                                </div>
+
+                                <div className="option-values-list">
+                                    {option.options.map((value, index) => (
+                                        <div key={index} className="option-value-item">
+                                            <span>{value.label}</span>
+                                            <span style={{ fontWeight: 'bold', color: value.price > 0 ? '#6B4423' : '#666' }}>
+                                                {value.price > 0 ? `+$${value.price.toFixed(2)}` : '不加價'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="option-actions">
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={() => handleEditOption(option)}
+                                    >
+                                        編輯
+                                    </button>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => handleDeleteOption(option.id)}
+                                    >
+                                        刪除
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+
+                    {showModal && (
+                        <div className="modal" onClick={() => setShowModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    {editingOption ? '編輯附加選項' : '新增附加選項'}
+                                </div>
+
+                                <div className="form-group">
+                                    <label>選項名稱 *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="例如：辣度、飲料、大小"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>選項類型 *</label>
+                                    <select
+                                        value={formData.type}
+                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                    >
+                                        <option value="radio">單選（只能選一個）</option>
+                                        <option value="checkbox">多選（可選多個）</option>
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>選項內容 *</label>
+                                    {currentOptionValues.map((value, index) => (
+                                        <div key={index} className="option-value-input-group">
+                                            <input
+                                                type="text"
+                                                placeholder="選項名稱（例如：不辣、微辣）"
+                                                value={value.label}
+                                                onChange={(e) => handleOptionValueChange(index, 'label', e.target.value)}
+                                            />
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                placeholder="加價"
+                                                value={value.price}
+                                                onChange={(e) => handleOptionValueChange(index, 'price', e.target.value)}
+                                                style={{ width: '120px' }}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-danger"
+                                                onClick={() => handleRemoveOptionValue(index)}
+                                                disabled={currentOptionValues.length === 1}
+                                            >
+                                                刪除
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        className="add-value-btn"
+                                        onClick={handleAddOptionValue}
+                                    >
+                                        ➕ 添加選項值
+                                    </button>
+                                </div>
+
+                                <div className="btn-group">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={handleSaveOption}
+                                    >
+                                        儲存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
         // 統計報表組件
         function Statistics({ orders, menu }) {
             const today = new Date().toDateString();
@@ -1272,13 +1612,16 @@
             const [currentView, setCurrentView] = useState('dashboard');
             const [orders, setOrders] = useState([]);
             const [menu, setMenu] = useState([]);
+            const [optionsLibrary, setOptionsLibrary] = useState([]);
 
             // 載入數據
             useEffect(() => {
                 const loadedOrders = loadFromLocalStorage('orders', []);
                 const loadedMenu = loadFromLocalStorage('menu', []);
+                const loadedOptionsLibrary = loadFromLocalStorage('optionsLibrary', []);
                 setOrders(loadedOrders);
                 setMenu(loadedMenu);
+                setOptionsLibrary(loadedOptionsLibrary);
             }, []);
 
             // 監聽 localStorage 變化
@@ -1286,6 +1629,7 @@
                 const handleStorageChange = () => {
                     setOrders(loadFromLocalStorage('orders', []));
                     setMenu(loadFromLocalStorage('menu', []));
+                    setOptionsLibrary(loadFromLocalStorage('optionsLibrary', []));
                 };
 
                 window.addEventListener('storage', handleStorageChange);
@@ -1321,6 +1665,11 @@
                 saveToLocalStorage('menu', updatedMenu);
             };
 
+            const handleUpdateOptionsLibrary = (updatedLibrary) => {
+                setOptionsLibrary(updatedLibrary);
+                saveToLocalStorage('optionsLibrary', updatedLibrary);
+            };
+
             if (!isLoggedIn) {
                 return <AdminLogin onLogin={handleLogin} />;
             }
@@ -1329,6 +1678,7 @@
                 { id: 'dashboard', icon: '📊', label: '儀表板' },
                 { id: 'orders', icon: '📦', label: '訂單管理' },
                 { id: 'menu', icon: '🍱', label: '菜單管理' },
+                { id: 'options', icon: '⚙️', label: '附加選項管理' },
                 { id: 'statistics', icon: '📈', label: '統計報表' }
             ];
 
@@ -1336,6 +1686,7 @@
                 dashboard: '儀表板',
                 orders: '訂單管理',
                 menu: '菜單管理',
+                options: '附加選項管理',
                 statistics: '統計報表'
             };
 
@@ -1343,6 +1694,7 @@
                 dashboard: '即時訂單監控與今日統計',
                 orders: '管理所有訂單狀態',
                 menu: '編輯菜單項目與供應狀態',
+                options: '管理可供選擇的附加選項，如辣度、飲料、大小等',
                 statistics: '查看營收與銷售統計'
             };
 
@@ -1393,6 +1745,12 @@
                                     <MenuManagement
                                         menu={menu}
                                         onUpdateMenu={handleUpdateMenu}
+                                    />
+                                )}
+                                {currentView === 'options' && (
+                                    <OptionsManagement
+                                        optionsLibrary={optionsLibrary}
+                                        onUpdateOptionsLibrary={handleUpdateOptionsLibrary}
                                     />
                                 )}
                                 {currentView === 'statistics' && (
