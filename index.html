@@ -1454,6 +1454,18 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Welcome screen fade in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* 手機版全面優化 */
         @media (max-width: 600px) {
             /* 整體容器 */
@@ -3121,6 +3133,9 @@
             const [tip, setTip] = useState(0);
             const [isProcessingPayment, setIsProcessingPayment] = useState(false);
             const [cardholderName, setCardholderName] = useState('');
+            const [showModeSelector, setShowModeSelector] = useState(true);
+            const [orderMode, setOrderMode] = useState(null); // 'dine-in', 'takeout', 'scheduled'
+            const [scheduledTime, setScheduledTime] = useState('');
             const [searchQuery, setSearchQuery] = useState('');
             const [selectedCategory, setSelectedCategory] = useState('all');
             const [menuSearchQuery, setMenuSearchQuery] = useState('');
@@ -3688,6 +3703,19 @@
                         {/* 悬浮购物车按钮 */}
                         {cart.length > 0 && (
                             <div className="cart-float-button" onClick={() => setShowCheckoutModal(true)}>
+                                {orderMode && (
+                                    <span style={{
+                                        fontSize: '13px',
+                                        opacity: 0.9,
+                                        marginRight: '8px',
+                                        paddingRight: '8px',
+                                        borderRight: '1px solid rgba(255,255,255,0.3)'
+                                    }}>
+                                        {orderMode === 'dine-in' && '🍽️ 內用'}
+                                        {orderMode === 'takeout' && '🥡 外帶'}
+                                        {orderMode === 'scheduled' && `⏰ ${scheduledTime}`}
+                                    </span>
+                                )}
                                 🛒 購物車
                                 <span className="cart-count-badge">{cartItemCount}</span>
                                 <span style={{ marginLeft: '8px' }}>${cartTotal.toFixed(2)}</span>
@@ -4247,6 +4275,260 @@
                     <div className="content">
                         {renderCustomerView()}
                     </div>
+
+                    {/* 訂餐模式選擇 Modal */}
+                    {showModeSelector && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            zIndex: 9999,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '20px',
+                            overflow: 'auto'
+                        }}>
+                            {/* 歡迎標題 */}
+                            <div style={{
+                                textAlign: 'center',
+                                marginBottom: '40px',
+                                animation: 'fadeIn 0.5s ease-in'
+                            }}>
+                                <div style={{
+                                    fontSize: '48px',
+                                    marginBottom: '16px'
+                                }}>🍴</div>
+                                <h1 style={{
+                                    color: 'white',
+                                    fontSize: '32px',
+                                    fontWeight: '700',
+                                    marginBottom: '12px',
+                                    textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                                }}>
+                                    Lee's Taiwanese Comfort Food
+                                </h1>
+                                <p style={{
+                                    color: 'rgba(255,255,255,0.9)',
+                                    fontSize: '18px',
+                                    fontWeight: '400'
+                                }}>
+                                    請選擇用餐方式
+                                </p>
+                            </div>
+
+                            {/* 選項卡片 */}
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '16px',
+                                width: '100%',
+                                maxWidth: '400px'
+                            }}>
+                                {/* 內用 */}
+                                <div
+                                    onClick={() => {
+                                        setOrderMode('dine-in');
+                                        setShowModeSelector(false);
+                                    }}
+                                    style={{
+                                        background: 'white',
+                                        borderRadius: '16px',
+                                        padding: '24px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                        transition: 'all 0.3s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '20px'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.2)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                                    }}
+                                >
+                                    <div style={{
+                                        fontSize: '48px',
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        borderRadius: '12px',
+                                        width: '72px',
+                                        height: '72px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        🍽️
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{
+                                            margin: 0,
+                                            fontSize: '22px',
+                                            fontWeight: '700',
+                                            color: '#1f2937',
+                                            marginBottom: '4px'
+                                        }}>內用 Dine-in</h3>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '14px',
+                                            color: '#6b7280'
+                                        }}>在餐廳用餐</p>
+                                    </div>
+                                    <div style={{ fontSize: '24px', color: '#9ca3af' }}>›</div>
+                                </div>
+
+                                {/* 外帶 */}
+                                <div
+                                    onClick={() => {
+                                        setOrderMode('takeout');
+                                        setShowModeSelector(false);
+                                    }}
+                                    style={{
+                                        background: 'white',
+                                        borderRadius: '16px',
+                                        padding: '24px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                        transition: 'all 0.3s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '20px'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.2)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                                    }}
+                                >
+                                    <div style={{
+                                        fontSize: '48px',
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        borderRadius: '12px',
+                                        width: '72px',
+                                        height: '72px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        🥡
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{
+                                            margin: 0,
+                                            fontSize: '22px',
+                                            fontWeight: '700',
+                                            color: '#1f2937',
+                                            marginBottom: '4px'
+                                        }}>外帶 Take-out</h3>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '14px',
+                                            color: '#6b7280'
+                                        }}>立即取餐</p>
+                                    </div>
+                                    <div style={{ fontSize: '24px', color: '#9ca3af' }}>›</div>
+                                </div>
+
+                                {/* 預約取餐 */}
+                                <div
+                                    onClick={() => {
+                                        const times = [];
+                                        const now = new Date();
+                                        const currentHour = now.getHours();
+                                        const currentMinute = now.getMinutes();
+
+                                        // 生成今天剩餘時段（每30分鐘一個選項）
+                                        for (let hour = currentHour; hour < 22; hour++) {
+                                            const startMinute = (hour === currentHour && currentMinute > 0) ? 30 : 0;
+                                            for (let minute = startMinute; minute < 60; minute += 30) {
+                                                if (hour === 21 && minute === 30) break; // 最晚到 21:30
+                                                const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                                                times.push(timeStr);
+                                            }
+                                        }
+
+                                        if (times.length === 0) {
+                                            alert('今日預約時段已結束，請選擇其他用餐方式');
+                                            return;
+                                        }
+
+                                        const selectedTime = prompt(`請選擇取餐時間：\n\n${times.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n\n請輸入編號 (1-${times.length})`);
+
+                                        if (selectedTime) {
+                                            const index = parseInt(selectedTime) - 1;
+                                            if (index >= 0 && index < times.length) {
+                                                setScheduledTime(times[index]);
+                                                setOrderMode('scheduled');
+                                                setShowModeSelector(false);
+                                            } else {
+                                                alert('無效的選擇');
+                                            }
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'white',
+                                        borderRadius: '16px',
+                                        padding: '24px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                                        transition: 'all 0.3s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '20px'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.2)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                                    }}
+                                >
+                                    <div style={{
+                                        fontSize: '48px',
+                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                        borderRadius: '12px',
+                                        width: '72px',
+                                        height: '72px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        ⏰
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{
+                                            margin: 0,
+                                            fontSize: '22px',
+                                            fontWeight: '700',
+                                            color: '#1f2937',
+                                            marginBottom: '4px'
+                                        }}>預約取餐 Schedule Pickup</h3>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '14px',
+                                            color: '#6b7280'
+                                        }}>選擇取餐時間</p>
+                                    </div>
+                                    <div style={{ fontSize: '24px', color: '#9ca3af' }}>›</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 結帳 Modal */}
                     {showCheckoutModal && (
