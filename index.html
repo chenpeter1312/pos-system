@@ -4537,6 +4537,63 @@
                                     <div style={{ fontSize: '24px', color: '#9ca3af' }}>›</div>
                                 </div>
                             </div>
+
+                            {/* 店家資訊 */}
+                            <div style={{
+                                textAlign: 'center',
+                                marginTop: '40px',
+                                padding: '24px',
+                                background: 'rgba(255,255,255,0.1)',
+                                borderRadius: '16px',
+                                backdropFilter: 'blur(10px)',
+                                maxWidth: '400px',
+                                width: '100%'
+                            }}>
+                                <div style={{
+                                    fontSize: '20px',
+                                    marginBottom: '12px'
+                                }}>📍</div>
+                                <p style={{
+                                    color: 'white',
+                                    fontSize: '15px',
+                                    margin: '0 0 16px 0',
+                                    fontWeight: '500',
+                                    lineHeight: '1.5'
+                                }}>
+                                    240 Legacy Dr #308 K<br/>
+                                    Plano, TX 75023
+                                </p>
+                                <a
+                                    href="https://www.instagram.com/leestaiwaneseconferfood/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        color: 'white',
+                                        textDecoration: 'none',
+                                        fontSize: '15px',
+                                        padding: '10px 20px',
+                                        background: 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                                        borderRadius: '24px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1.05)';
+                                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.3)';
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '20px' }}>📷</span>
+                                    歡迎追蹤我們的 Instagram
+                                </a>
+                            </div>
                         </div>
                     )}
 
