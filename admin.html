@@ -1240,241 +1240,30 @@
             );
         }
 
-        // 附加選項管理組件
+                // 附加選項管理組件 (簡化版)
         function OptionsManagement({ optionsLibrary, onUpdateOptionsLibrary }) {
-            const [showModal, setShowModal] = useState(false);
-            const [editingOption, setEditingOption] = useState(null);
-            const [currentOptionValues, setCurrentOptionValues] = useState([]);
-            const [formData, setFormData] = useState({
-                name: '',
-                type: 'radio'
-            });            console.log('OptionsManagement 渲染中...', { 
-                optionsLibrary, 
-                optionsLibraryLength: optionsLibrary?.length 
-            });
-
-
-            const handleAddNewOption = () => {
-                setEditingOption(null);
-                setFormData({
-                    name: '',
-                    type: 'radio'
-                });
-                setCurrentOptionValues([{ label: '', price: 0 }]);
-                setShowModal(true);
-            };
-
-            const handleEditOption = (option) => {
-                setEditingOption(option);
-                setFormData({
-                    name: option.name,
-                    type: option.type
-                });
-                setCurrentOptionValues([...option.options]);
-                setShowModal(true);
-            };
-
-            const handleDeleteOption = (id) => {
-                if (confirm('確定要刪除這個選項嗎？')) {
-                    const updatedLibrary = optionsLibrary.filter(opt => opt.id !== id);
-                    onUpdateOptionsLibrary(updatedLibrary);
-                }
-            };
-
-            const handleSaveOption = () => {
-                if (!formData.name.trim()) {
-                    alert('請輸入選項名稱');
-                    return;
-                }
-
-                if (currentOptionValues.length === 0 || !currentOptionValues.every(v => v.label.trim())) {
-                    alert('請至少添加一個選項值並填寫完整');
-                    return;
-                }
-
-                const newOption = {
-                    id: editingOption ? editingOption.id : `opt-${Date.now()}`,
-                    name: formData.name,
-                    type: formData.type,
-                    options: currentOptionValues.map(v => ({
-                        label: v.label,
-                        price: parseFloat(v.price) || 0
-                    }))
-                };
-
-                let updatedLibrary;
-                if (editingOption) {
-                    updatedLibrary = optionsLibrary.map(opt =>
-                        opt.id === editingOption.id ? newOption : opt
-                    );
-                } else {
-                    updatedLibrary = [...optionsLibrary, newOption];
-                }
-
-                onUpdateOptionsLibrary(updatedLibrary);
-                setShowModal(false);
-            };
-
-            const handleAddOptionValue = () => {
-                setCurrentOptionValues([...currentOptionValues, { label: '', price: 0 }]);
-            };
-
-            const handleRemoveOptionValue = (index) => {
-                if (currentOptionValues.length > 1) {
-                    setCurrentOptionValues(currentOptionValues.filter((_, i) => i !== index));
-                }
-            };
-
-            const handleOptionValueChange = (index, field, value) => {
-                const updated = [...currentOptionValues];
-                updated[index][field] = value;
-                setCurrentOptionValues(updated);
-            };
-
             return (
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                        <div>
-                            <p style={{ color: '#666', fontSize: '14px' }}>
-                                管理可供選擇的附加選項，如辣度、飲料、大小等
-                            </p>
-                        </div>
-                        <button
-                            className="btn btn-success"
-                            onClick={handleAddNewOption}
-                        >
-                            ➕ 新增選項
-                        </button>
+                <div style={{ padding: '20px' }}>
+                    <h2 style={{ marginBottom: '20px', color: '#6B4423' }}>附加選項管理</h2>
+                    <p style={{ color: '#666', marginBottom: '20px' }}>
+                        管理可供選擇的附加選項，如辣度、飲料、大小等
+                    </p>
+                    
+                    <div style={{ 
+                        padding: '40px', 
+                        textAlign: 'center', 
+                        border: '2px dashed #ccc',
+                        borderRadius: '8px',
+                        marginTop: '20px'
+                    }}>
+                        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
+                        <p style={{ fontSize: '16px', color: '#666' }}>
+                            附加選項管理功能
+                        </p>
+                        <p style={{ fontSize: '14px', color: '#999', marginTop: '10px' }}>
+                            選項數量：{optionsLibrary ? optionsLibrary.length : 0}
+                        </p>
                     </div>
-
-                    {optionsLibrary.length === 0 ? (
-                        <div className="empty-state">
-                            <div className="empty-state-icon">📝</div>
-                            <p>目前沒有附加選項，點擊上方按鈕開始新增</p>
-                        </div>
-                    ) : (
-                        optionsLibrary.map(option => (
-                            <div key={option.id} className="option-card">
-                                <div className="option-header">
-                                    <div className="option-name">{option.name}</div>
-                                    <span className={`option-type-badge ${option.type === 'radio' ? 'badge-radio' : 'badge-checkbox'}`}>
-                                        {option.type === 'radio' ? '單選' : '多選'}
-                                    </span>
-                                </div>
-
-                                <div className="option-values-list">
-                                    {option.options.map((value, index) => (
-                                        <div key={index} className="option-value-item">
-                                            <span>{value.label}</span>
-                                            <span style={{ fontWeight: 'bold', color: value.price > 0 ? '#6B4423' : '#666' }}>
-                                                {value.price > 0 ? `+$${value.price.toFixed(2)}` : '不加價'}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="option-actions">
-                                    <button
-                                        className="btn btn-secondary"
-                                        onClick={() => handleEditOption(option)}
-                                    >
-                                        編輯
-                                    </button>
-                                    <button
-                                        className="btn btn-danger"
-                                        onClick={() => handleDeleteOption(option.id)}
-                                    >
-                                        刪除
-                                    </button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-
-                    {showModal && (
-                        <div className="modal" onClick={() => setShowModal(false)}>
-                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                                <div className="modal-header">
-                                    {editingOption ? '編輯附加選項' : '新增附加選項'}
-                                </div>
-
-                                <div className="form-group">
-                                    <label>選項名稱 *</label>
-                                    <input
-                                        type="text"
-                                        placeholder="例如：辣度、飲料、大小"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label>選項類型 *</label>
-                                    <select
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    >
-                                        <option value="radio">單選（只能選一個）</option>
-                                        <option value="checkbox">多選（可選多個）</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>選項內容 *</label>
-                                    {currentOptionValues.map((value, index) => (
-                                        <div key={index} className="option-value-input-group">
-                                            <input
-                                                type="text"
-                                                placeholder="選項名稱（例如：不辣、微辣）"
-                                                value={value.label}
-                                                onChange={(e) => handleOptionValueChange(index, 'label', e.target.value)}
-                                            />
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                placeholder="加價"
-                                                value={value.price}
-                                                onChange={(e) => handleOptionValueChange(index, 'price', e.target.value)}
-                                                style={{ width: '120px' }}
-                                            />
-                                            <button
-                                                type="button"
-                                                className="btn btn-danger"
-                                                onClick={() => handleRemoveOptionValue(index)}
-                                                disabled={currentOptionValues.length === 1}
-                                            >
-                                                刪除
-                                            </button>
-                                        </div>
-                                    ))}
-                                    <button
-                                        type="button"
-                                        className="add-value-btn"
-                                        onClick={handleAddOptionValue}
-                                    >
-                                        ➕ 添加選項值
-                                    </button>
-                                </div>
-
-                                <div className="btn-group">
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary"
-                                        onClick={() => setShowModal(false)}
-                                    >
-                                        取消
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary"
-                                        onClick={handleSaveOption}
-                                    >
-                                        儲存
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
         }
