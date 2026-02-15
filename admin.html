@@ -716,8 +716,8 @@
 
         // 登入組件
         function AdminLogin({ onLogin }) {
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
+            const [password, setPassword] = React.useState('');
+            const [error, setError] = React.useState('');
 
             const handleLogin = (e) => {
                 e.preventDefault();
@@ -728,28 +728,30 @@
                 }
             };
 
-            return (
-                <div className="login-container">
-                    <h2 className="login-title">🔐 管理後台登入</h2>
-                    <form onSubmit={handleLogin}>
-                        <div className="form-group">
-                            <label>密碼</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="請輸入管理密碼"
-                            />
-                        </div>
-                        {error && <p style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                            登入
-                        </button>
-                    </form>
-                    <p style={{ marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px' }}>
-                        預設密碼: admin123
-                    </p>
-                </div>
+            return React.createElement('div', { className: 'login-container' },
+                React.createElement('h2', { className: 'login-title' }, '🔐 管理後台登入'),
+                React.createElement('form', { onSubmit: handleLogin },
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, '密碼'),
+                        React.createElement('input', {
+                            type: 'password',
+                            value: password,
+                            onChange: (e) => setPassword(e.target.value),
+                            placeholder: '請輸入管理密碼'
+                        })
+                    ),
+                    error && React.createElement('p', {
+                        style: { color: 'red', marginBottom: '15px' }
+                    }, error),
+                    React.createElement('button', {
+                        type: 'submit',
+                        className: 'btn btn-primary',
+                        style: { width: '100%' }
+                    }, '登入')
+                ),
+                React.createElement('p', {
+                    style: { marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px' }
+                }, '預設密碼: admin123')
             );
         }
 
@@ -1562,7 +1564,7 @@
             };
 
             if (!isLoggedIn) {
-                return <AdminLogin onLogin={handleLogin} />;
+                return React.createElement(AdminLogin, { onLogin: handleLogin });
             }
 
             const menuItems = [
@@ -1655,7 +1657,7 @@
         }
 
         // 渲染應用程式
-        ReactDOM.render(<AdminApp />, document.getElementById('root'));
+        ReactDOM.render(React.createElement(AdminApp), document.getElementById('root'));
     </script>
 </body>
 </html>
