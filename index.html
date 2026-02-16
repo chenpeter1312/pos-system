@@ -1850,19 +1850,8 @@
                     emoji: '🍗',
                     image: 'https://api.chowbus.com/compendium/api/v1/image_proxy/blobs/Skg4REFRRUhiV1Z6YzJGblpRSC9nQUFCQWdFQ1NVUUJEQUFCQkZSNWNHVUJEQUFBQUJML2dBRUhOVEE1TnpnM05BRUVRbXh2WWdBPS0tWVFic2FKVnM3c20ydE51ckpsQU9hWHdkK1RVc3ZhK3Z0VXMwOGx5VXdmWT0',
                     description: '鷄胸6-8oz / Chicken Steak (6-8oz breast)',
-                    options: [
-                        {
-                            name: '辣度',
-                            type: 'single',
-                            required: true,
-                            choices: [
-                                { label: '不辣', price: 0 },
-                                { label: '小辣', price: 0 },
-                                { label: '中辣', price: 0 },
-                                { label: '大辣', price: 0 }
-                            ]
-                        }
-                    ]
+                    // 使用全局選項庫（ID: 1=辣度, 2=飯量, 3=口味, 4=配菜, 5=附加飲料, 6=水）
+                    appliedOptionIds: [1, 2, 3, 4, 5, 6]
                 },
                 {
                     id: 3,
@@ -1873,19 +1862,8 @@
                     emoji: '🦴',
                     image: 'https://api.chowbus.com/compendium/api/v1/image_proxy/blobs/Skg4REFRRUhiV1Z6YzJGblpRSC9nQUFCQWdFQ1NVUUJEQUFCQkZSNWNHVUJEQUFBQUJML2dBRUhOVEE1TnpnNE1BRUVRbXh2WWdBPS0tWkN2TGJuTFJTckF0TVQ2bkc5elY3TWVPcjhOSmdZNCtzMlNCWFVOR2xTTT0',
                     description: 'Golden Garlic Spare Ribs',
-                    options: [
-                        {
-                            name: '辣度',
-                            type: 'single',
-                            required: true,
-                            choices: [
-                                { label: '不辣', price: 0 },
-                                { label: '小辣', price: 0 },
-                                { label: '中辣', price: 0 },
-                                { label: '大辣', price: 0 }
-                            ]
-                        }
-                    ]
+                    // 使用全局選項庫
+                    appliedOptionIds: [1, 2, 3, 4, 5, 6]
                 },
                 {
                     id: 4,
@@ -3295,13 +3273,32 @@
                     return;
                 }
 
-                // 檢查是否有附加選項
-                if (item.options && item.options.length > 0) {
+                // 檢查是否有附加選項（支持全局選項庫）
+                let itemOptions = [];
+
+                // 優先使用 appliedOptionIds 從全局選項庫獲取選項
+                if (item.appliedOptionIds && item.appliedOptionIds.length > 0) {
+                    itemOptions = optionsLibrary
+                        .filter(opt => item.appliedOptionIds.includes(opt.id) && opt.isEnabled !== false)
+                        .map(opt => ({
+                            name: opt.name,
+                            type: opt.type,
+                            required: opt.required,
+                            choices: opt.choices.filter(c => c.isEnabled !== false)
+                        }));
+                }
+                // 向後兼容：如果沒有 appliedOptionIds，使用舊的 options
+                else if (item.options && item.options.length > 0) {
+                    itemOptions = item.options;
+                }
+
+                if (itemOptions.length > 0) {
                     // 打開選項彈窗
-                    setSelectedItem(item);
+                    const itemWithOptions = { ...item, options: itemOptions };
+                    setSelectedItem(itemWithOptions);
                     // 初始化選項選擇（為必選項設置默認值）
                     const defaultOptions = {};
-                    item.options.forEach(option => {
+                    itemOptions.forEach(option => {
                         if (option.type === 'single' && option.required) {
                             defaultOptions[option.name] = option.choices[0].label;
                         } else if (option.type === 'multiple') {
