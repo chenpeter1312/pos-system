@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生产版数据迁移工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Lora', 'Noto Serif TC', serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #E8DCC8 0%, #F9F5EF 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(107, 68, 35, 0.15);
+        }
+        h1 {
+            color: #6B4423;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .subtitle {
+            color: #8B6F47;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .section {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6B4423;
+        }
+        .section-title {
+            font-weight: bold;
+            color: #6B4423;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid #E8DCC8;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            color: #6B4423;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        button {
+            background: linear-gradient(135deg, #8B6F47 0%, #6B4423 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            font-family: 'Lora', 'Noto Serif TC', serif;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.danger {
+            background: linear-gradient(135deg, #C1272D 0%, #A01F23 100%);
+        }
+        button.secondary {
+            background: linear-gradient(135deg, #666 0%, #444 100%);
+        }
+        #log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-warning { color: #fbbf24; }
+        .log-info { color: #60a5fa; }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #059669;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 生产版数据迁移工具</h1>
+        <p class="subtitle">localStorage → Supabase 云端数据库 | Safari 优化版</p>
+
+        <div class="section">
+            <div class="section-title">📊 本地数据统计</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">🍱 菜单</div>
+                    <div class="stat-value" id="menu-count">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">⚙️ 选项</div>
+                    <div class="stat-value" id="options-count">-</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📦 订单</div>
+                    <div class="stat-value" id="orders-count">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔧 操作</div>
+            <div class="button-group">
+                <button onclick="checkConnection()" id="check-btn">
+                    1️⃣ 检查 Supabase 连接
+                </button>
+                <button onclick="previewMigration()" id="preview-btn">
+                    2️⃣ 预览迁移数据
+                </button>
+                <button onclick="startMigration()" id="migrate-btn">
+                    3️⃣ 开始迁移
+                </button>
+                <button onclick="clearLog()" class="secondary">
+                    清空日志
+                </button>
+                <button onclick="clearSupabase()" class="danger">
+                    ⚠️ 清空 Supabase 数据
+                </button>
+            </div>
+        </div>
+
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        // ==========================================
+        // Supabase 配置
+        // ==========================================
+        var SUPABASE_URL = 'https://tskelejztsdeewtpjcoq.supabase.co';
+        var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2VsZWp6dHNkZWV3dHBqY29xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTUxNjUsImV4cCI6MjA4Njc3MTE2NX0.WFGyeBVRIXfrA9h2BVwQ9zpbmcHDXmI0xsFfdDVdGos';
+
+        var supabase = null;
+        var logElement = null;
+        var supabaseLoaded = false;
+
+        // ==========================================
+        // 动态加载 Supabase CDN（确保成功加载）
+        // ==========================================
+        (function loadSupabaseLib() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js';
+
+            script.onload = function() {
+                console.log('✅ Supabase CDN 加载成功');
+                supabaseLoaded = true;
+
+                // 立即初始化客户端
+                if (window.supabase && window.supabase.createClient) {
+                    try {
+                        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                        console.log('✅ Supabase 客户端初始化成功');
+
+                        // 如果页面已加载完成，更新日志
+                        if (logElement) {
+                            log('✅ Supabase 客户端初始化成功', 'success');
+                        }
+                    } catch (e) {
+                        console.error('❌ Supabase 初始化失败:', e);
+                        if (logElement) {
+                            log('❌ Supabase 初始化失败: ' + e.message, 'error');
+                        }
+                    }
+                }
+            };
+
+            script.onerror = function() {
+                console.error('❌ Supabase CDN 加载失败');
+                if (logElement) {
+                    log('❌ Supabase CDN 加载失败', 'error');
+                }
+            };
+
+            document.head.appendChild(script);
+        })();
+
+        // ==========================================
+        // 日志系统
+        // ==========================================
+        function log(message, type) {
+            if (!type) type = 'info';
+
+            var timestamp = new Date().toLocaleTimeString('zh-CN');
+            var className = 'log-' + type;
+            var line = '[' + timestamp + '] ' + message + '\n';
+
+            if (logElement) {
+                var span = document.createElement('span');
+                span.className = className;
+                span.textContent = line;
+                logElement.appendChild(span);
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+
+            console.log('[' + type + '] ' + message);
+        }
+
+        function clearLog() {
+            if (logElement) {
+                logElement.textContent = '';
+            }
+            log('日志已清空', 'info');
+        }
+
+        // ==========================================
+        // SHA-256 哈希函数 (用于幂等性)
+        // ==========================================
+        async function generateHash(data) {
+            var jsonString = JSON.stringify(data);
+            var encoder = new TextEncoder();
+            var dataBuffer = encoder.encode(jsonString);
+            var hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+            var hashArray = Array.from(new Uint8Array(hashBuffer));
+            var hashHex = hashArray.map(function(b) {
+                return b.toString(16).padStart(2, '0');
+            }).join('');
+            return hashHex;
+        }
+
+        // ==========================================
+        // 第一层：从 localStorage 提取数据
+        // ==========================================
+        function extractFromLocalStorage() {
+            log('=== 开始提取 localStorage 数据 ===', 'info');
+
+            var extracted = {
+                menu: [],
+                options: [],
+                orders: []
+            };
+
+            try {
+                var menuRaw = localStorage.getItem('menu');
+                if (menuRaw) {
+                    try {
+                        extracted.menu = JSON.parse(menuRaw);
+                        log('✅ 提取菜单: ' + extracted.menu.length + ' 个', 'success');
+                    } catch (e) {
+                        log('❌ 菜单数据解析失败: ' + e.message, 'error');
+                        extracted.menu = [];
+                    }
+                } else {
+                    log('⚠️ localStorage 中没有菜单数据', 'warning');
+                }
+            } catch (e) {
+                log('❌ 读取菜单失败: ' + e.message, 'error');
+            }
+
+            try {
+                var optionsRaw = localStorage.getItem('optionsLibrary');
+                if (optionsRaw) {
+                    try {
+                        extracted.options = JSON.parse(optionsRaw);
+                        log('✅ 提取选项库: ' + extracted.options.length + ' 个', 'success');
+                    } catch (e) {
+                        log('❌ 选项库数据解析失败: ' + e.message, 'error');
+                        extracted.options = [];
+                    }
+                } else {
+                    log('⚠️ localStorage 中没有选项库数据', 'warning');
+                }
+            } catch (e) {
+                log('❌ 读取选项库失败: ' + e.message, 'error');
+            }
+
+            try {
+                var ordersRaw = localStorage.getItem('orders');
+                if (ordersRaw) {
+                    try {
+                        extracted.orders = JSON.parse(ordersRaw);
+                        log('✅ 提取订单: ' + extracted.orders.length + ' 个', 'success');
+                    } catch (e) {
+                        log('❌ 订单数据解析失败: ' + e.message, 'error');
+                        extracted.orders = [];
+                    }
+                } else {
+                    log('⚠️ localStorage 中没有订单数据', 'warning');
+                }
+            } catch (e) {
+                log('❌ 读取订单失败: ' + e.message, 'error');
+            }
+
+            return extracted;
+        }
+
+        // ==========================================
+        // 第二层：转换为数据库行格式
+        // ==========================================
+        async function transformToRows(extracted) {
+            log('=== 开始转换数据格式 ===', 'info');
+
+            var transformed = {
+                menuRows: [],
+                optionsRows: [],
+                ordersRows: []
+            };
+
+            // 转换菜单
+            for (var i = 0; i < extracted.menu.length; i++) {
+                var item = extracted.menu[i];
+                try {
+                    var menuRow = {
+                        id: item.id,
+                        name: item.name,
+                        english_name: item.englishName || null,
+                        price: item.price,
+                        category: item.category,
+                        emoji: item.emoji || null,
+                        image: item.image || null,
+                        description: item.description || null,
+                        available: item.available !== false,
+                        applied_option_ids: item.appliedOptionIds || []
+                    };
+                    transformed.menuRows.push(menuRow);
+                } catch (e) {
+                    log('⚠️ 菜单项转换失败 (ID: ' + item.id + '): ' + e.message, 'warning');
+                }
+            }
+            log('✅ 菜单转换完成: ' + transformed.menuRows.length + ' 行', 'success');
+
+            // 转换选项库
+            for (var j = 0; j < extracted.options.length; j++) {
+                var opt = extracted.options[j];
+                try {
+                    var optRow = {
+                        id: opt.id,
+                        name: opt.name,
+                        type: opt.type,
+                        required: opt.required || false,
+                        is_enabled: opt.isEnabled !== false,
+                        categories: opt.categories || [],
+                        choices: opt.choices
+                    };
+                    transformed.optionsRows.push(optRow);
+                } catch (e) {
+                    log('⚠️ 选项转换失败 (ID: ' + opt.id + '): ' + e.message, 'warning');
+                }
+            }
+            log('✅ 选项库转换完成: ' + transformed.optionsRows.length + ' 行', 'success');
+
+            // 转换订单
+            for (var k = 0; k < extracted.orders.length; k++) {
+                var order = extracted.orders[k];
+                try {
+                    var orderRow = {
+                        id: order.id,
+                        customer_name: order.customerName || null,
+                        phone: order.phone || null,
+                        service_mode: order.serviceMode || null,
+                        items: order.items,
+                        total: order.total,
+                        status: order.status || 'pending',
+                        notes: order.notes || null,
+                        scheduled_time: order.scheduledTime || null,
+                        created_at: order.timestamp || new Date().toISOString()
+                    };
+                    transformed.ordersRows.push(orderRow);
+                } catch (e) {
+                    log('⚠️ 订单转换失败 (ID: ' + order.id + '): ' + e.message, 'warning');
+                }
+            }
+            log('✅ 订单转换完成: ' + transformed.ordersRows.length + ' 行', 'success');
+
+            return transformed;
+        }
+
+        // ==========================================
+        // 第三层：加载到 Supabase
+        // ==========================================
+        async function loadToSupabase(transformed) {
+            log('=== 开始加载到 Supabase ===', 'info');
+
+            if (!supabase) {
+                throw new Error('Supabase 客户端未初始化');
+            }
+
+            var results = {
+                menu: 0,
+                options: 0,
+                orders: 0
+            };
+
+            // 上传选项库 (先上传，因为菜单依赖它)
+            if (transformed.optionsRows.length > 0) {
+                log('正在上传选项库...', 'info');
+                var optResponse = await supabase
+                    .from('options_library')
+                    .upsert(transformed.optionsRows, { onConflict: 'id' });
+
+                if (optResponse.error) {
+                    throw new Error('选项库上传失败: ' + optResponse.error.message);
+                }
+                results.options = transformed.optionsRows.length;
+                log('✅ 选项库上传成功: ' + results.options + ' 行', 'success');
+            }
+
+            // 上传菜单
+            if (transformed.menuRows.length > 0) {
+                log('正在上传菜单...', 'info');
+                var menuResponse = await supabase
+                    .from('menu')
+                    .upsert(transformed.menuRows, { onConflict: 'id' });
+
+                if (menuResponse.error) {
+                    throw new Error('菜单上传失败: ' + menuResponse.error.message);
+                }
+                results.menu = transformed.menuRows.length;
+                log('✅ 菜单上传成功: ' + results.menu + ' 行', 'success');
+            }
+
+            // 上传订单
+            if (transformed.ordersRows.length > 0) {
+                log('正在上传订单...', 'info');
+                var ordersResponse = await supabase
+                    .from('orders')
+                    .upsert(transformed.ordersRows, { onConflict: 'id' });
+
+                if (ordersResponse.error) {
+                    throw new Error('订单上传失败: ' + ordersResponse.error.message);
+                }
+                results.orders = transformed.ordersRows.length;
+                log('✅ 订单上传成功: ' + results.orders + ' 行', 'success');
+            }
+
+            return results;
+        }
+
+        // ==========================================
+        // Supabase 初始化检查（确保库已加载）
+        // ==========================================
+        function ensureSupabaseInitialized() {
+            if (supabase) {
+                return true;
+            }
+
+            if (!supabaseLoaded) {
+                log('❌ Supabase 库还在加载中，请稍后再试', 'error');
+                return false;
+            }
+
+            if (!window.supabase) {
+                log('❌ Supabase 库加载失败，请刷新页面重试', 'error');
+                return false;
+            }
+
+            // 尝试延迟初始化
+            try {
+                log('初始化 Supabase 客户端...', 'info');
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                log('✅ Supabase 客户端初始化成功', 'success');
+                return true;
+            } catch (e) {
+                log('❌ Supabase 初始化失败: ' + e.message, 'error');
+                return false;
+            }
+        }
+
+        // ==========================================
+        // UI 操作函数
+        // ==========================================
+
+        function checkConnection() {
+            log('\n=== 检查 Supabase 连接 ===', 'info');
+
+            if (!ensureSupabaseInitialized()) {
+                return;
+            }
+
+            var btn = document.getElementById('check-btn');
+            btn.disabled = true;
+            btn.textContent = '检查中...';
+
+            supabase.from('menu')
+                .select('*', { count: 'exact', head: true })
+                .then(function(response) {
+                    if (response.error) {
+                        throw response.error;
+                    }
+
+                    var menuCount = response.count || 0;
+                    log('✅ 连接成功！', 'success');
+                    log('menu 表当前有 ' + menuCount + ' 条记录', 'info');
+
+                    return Promise.all([
+                        supabase.from('options_library').select('*', { count: 'exact', head: true }),
+                        supabase.from('orders').select('*', { count: 'exact', head: true })
+                    ]);
+                })
+                .then(function(responses) {
+                    var optCount = responses[0].count || 0;
+                    var ordCount = responses[1].count || 0;
+
+                    log('options_library 表当前有 ' + optCount + ' 条记录', 'info');
+                    log('orders 表当前有 ' + ordCount + ' 条记录', 'info');
+                    log('=== 检查完成 ===\n', 'success');
+                })
+                .catch(function(error) {
+                    log('❌ 连接失败: ' + error.message, 'error');
+                    log('请检查：1) 配置是否正确 2) 表是否创建 3) RLS策略是否设置', 'warning');
+                })
+                .finally(function() {
+                    btn.disabled = false;
+                    btn.textContent = '1️⃣ 检查 Supabase 连接';
+                });
+        }
+
+        function previewMigration() {
+            log('\n=== 预览迁移数据 ===', 'info');
+
+            var extracted = extractFromLocalStorage();
+
+            log('\n📊 数据统计：', 'info');
+            log('🍱 菜单: ' + extracted.menu.length + ' 个', 'info');
+            log('⚙️ 选项库: ' + extracted.options.length + ' 个', 'info');
+            log('📦 订单: ' + extracted.orders.length + ' 个', 'info');
+
+            if (extracted.menu.length > 0) {
+                log('\n🍱 菜单项示例 (前3个):', 'info');
+                for (var i = 0; i < Math.min(3, extracted.menu.length); i++) {
+                    var item = extracted.menu[i];
+                    log('  - ' + item.name + ' ($' + item.price + ')', 'info');
+                }
+            }
+
+            if (extracted.options.length > 0) {
+                log('\n⚙️ 选项示例 (前3个):', 'info');
+                for (var j = 0; j < Math.min(3, extracted.options.length); j++) {
+                    var opt = extracted.options[j];
+                    log('  - ' + opt.name + ' (' + opt.type + ')', 'info');
+                }
+            }
+
+            log('\n✅ 预览完成！点击「开始迁移」进行迁移', 'success');
+        }
+
+        function startMigration() {
+            if (!confirm('确定要开始迁移数据吗？\n\n这将把 localStorage 的数据上传到 Supabase。')) {
+                return;
+            }
+
+            if (!ensureSupabaseInitialized()) {
+                return;
+            }
+
+            log('\n========================================', 'info');
+            log('开始迁移流程', 'info');
+            log('========================================\n', 'info');
+
+            var btn = document.getElementById('migrate-btn');
+            btn.disabled = true;
+            btn.textContent = '迁移中...';
+
+            var startTime = Date.now();
+            var extracted = null;
+            var transformed = null;
+
+            Promise.resolve()
+                .then(function() {
+                    // 第一步：提取
+                    extracted = extractFromLocalStorage();
+                    return extracted;
+                })
+                .then(function() {
+                    // 第二步：转换
+                    return transformToRows(extracted);
+                })
+                .then(function(transformedData) {
+                    transformed = transformedData;
+                    // 第三步：加载
+                    return loadToSupabase(transformed);
+                })
+                .then(function(results) {
+                    var duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                    log('\n========================================', 'success');
+                    log('🎉 迁移完成！', 'success');
+                    log('========================================', 'success');
+                    log('✅ 菜单: ' + results.menu + ' 行', 'success');
+                    log('✅ 选项库: ' + results.options + ' 行', 'success');
+                    log('✅ 订单: ' + results.orders + ' 行', 'success');
+                    log('⏱️ 用时: ' + duration + ' 秒', 'info');
+                    log('\n现在可以修改代码使用 Supabase API 了！', 'info');
+                })
+                .catch(function(error) {
+                    log('\n❌ 迁移失败: ' + error.message, 'error');
+                    if (error.stack) {
+                        log('错误堆栈: ' + error.stack, 'error');
+                    }
+                })
+                .finally(function() {
+                    btn.disabled = false;
+                    btn.textContent = '3️⃣ 开始迁移';
+                });
+        }
+
+        function clearSupabase() {
+            if (!confirm('⚠️ 警告：这将删除 Supabase 中的所有数据！\n\n确定继续吗？')) {
+                return;
+            }
+
+            if (!confirm('再次确认：真的要清空所有 Supabase 数据吗？\n\n此操作不可恢复！')) {
+                return;
+            }
+
+            if (!ensureSupabaseInitialized()) {
+                return;
+            }
+
+            log('\n=== 开始清空 Supabase 数据 ===', 'warning');
+
+            Promise.resolve()
+                .then(function() {
+                    log('正在清空订单...', 'info');
+                    return supabase.from('orders').delete().neq('id', 0);
+                })
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    log('✅ 订单已清空', 'success');
+
+                    log('正在清空菜单...', 'info');
+                    return supabase.from('menu').delete().neq('id', 0);
+                })
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    log('✅ 菜单已清空', 'success');
+
+                    log('正在清空选项库...', 'info');
+                    return supabase.from('options_library').delete().neq('id', 0);
+                })
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    log('✅ 选项库已清空', 'success');
+                    log('\n=== 清空完成 ===\n', 'success');
+                })
+                .catch(function(error) {
+                    log('❌ 清空失败: ' + error.message, 'error');
+                });
+        }
+
+        // ==========================================
+        // 页面初始化
+        // ==========================================
+        window.onload = function() {
+            log('页面加载完成', 'info');
+            logElement = document.getElementById('log');
+
+            // 检查 Supabase 是否已加载
+            if (supabaseLoaded && supabase) {
+                log('✅ Supabase 客户端已就绪', 'success');
+            } else if (supabaseLoaded) {
+                log('⚠️ Supabase 库已加载，但客户端未初始化', 'warning');
+            } else {
+                log('⏳ 等待 Supabase 库加载中...', 'info');
+            }
+
+            // 读取并显示本地数据统计
+            try {
+                var menu = [];
+                var options = [];
+                var orders = [];
+
+                try {
+                    var menuRaw = localStorage.getItem('menu');
+                    if (menuRaw) menu = JSON.parse(menuRaw);
+                } catch (e) {
+                    log('⚠️ 读取菜单失败: ' + e.message, 'warning');
+                }
+
+                try {
+                    var optionsRaw = localStorage.getItem('optionsLibrary');
+                    if (optionsRaw) options = JSON.parse(optionsRaw);
+                } catch (e) {
+                    log('⚠️ 读取选项库失败: ' + e.message, 'warning');
+                }
+
+                try {
+                    var ordersRaw = localStorage.getItem('orders');
+                    if (ordersRaw) orders = JSON.parse(ordersRaw);
+                } catch (e) {
+                    log('⚠️ 读取订单失败: ' + e.message, 'warning');
+                }
+
+                document.getElementById('menu-count').textContent = menu.length;
+                document.getElementById('options-count').textContent = options.length;
+                document.getElementById('orders-count').textContent = orders.length;
+
+                log('✅ localStorage 数据读取成功', 'success');
+                log('📊 菜单: ' + menu.length + ' | 选项: ' + options.length + ' | 订单: ' + orders.length, 'info');
+                log('\n准备就绪！请点击按钮开始操作 👆\n', 'success');
+            } catch (e) {
+                log('❌ 读取 localStorage 失败: ' + e.message, 'error');
+            }
+        };
+    </script>
+</body>
+</html>

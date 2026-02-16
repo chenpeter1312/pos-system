@@ -1811,6 +1811,41 @@
     <div id="root">
     </div>
 
+    <!-- Supabase 初始化 -->
+    <script>
+        // Supabase 配置
+        var SUPABASE_URL = 'https://tskelejztsdeewtpjcoq.supabase.co';
+        var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2VsZWp6dHNkZWV3dHBqY29xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTUxNjUsImV4cCI6MjA4Njc3MTE2NX0.WFGyeBVRIXfrA9h2BVwQ9zpbmcHDXmI0xsFfdDVdGos';
+
+        window.supabaseClient = null;
+        window.supabaseReady = false;
+
+        // 动态加载 Supabase CDN
+        (function() {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js';
+
+            script.onload = function() {
+                console.log('✅ Supabase CDN loaded');
+                if (window.supabase && window.supabase.createClient) {
+                    try {
+                        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                        window.supabaseReady = true;
+                        console.log('✅ Supabase client initialized');
+                    } catch (e) {
+                        console.error('❌ Supabase initialization failed:', e);
+                    }
+                }
+            };
+
+            script.onerror = function() {
+                console.error('❌ Supabase CDN loading failed');
+            };
+
+            document.head.appendChild(script);
+        })();
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
 
@@ -3233,9 +3268,96 @@
                 loadData();
             }, []);
 
-            const loadData = () => {
+            const loadData = async () => {
+                try {
+                    // 等待 Supabase 初始化
+                    let attempts = 0;
+                    while (!window.supabaseReady && attempts < 50) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+
+                    if (!window.supabaseReady || !window.supabaseClient) {
+                        console.error('❌ Supabase not ready, falling back to localStorage');
+                        loadDataFromLocalStorage();
+                        return;
+                    }
+
+                    console.log('📡 Loading data from Supabase...');
+
+                    // 從 Supabase 加載菜單
+                    const { data: menuData, error: menuError } = await window.supabaseClient
+                        .from('menu')
+                        .select('*')
+                        .eq('available', true)
+                        .order('id');
+
+                    if (menuError) {
+                        console.error('❌ Error loading menu:', menuError);
+                        loadDataFromLocalStorage();
+                        return;
+                    }
+
+                    // 轉換數據庫字段到前端格式
+                    const normalizedMenu = (menuData || []).map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        englishName: item.english_name || '',
+                        price: parseFloat(item.price),
+                        category: item.category,
+                        emoji: item.emoji || '',
+                        image: item.image || 'images/placeholder.jpg',
+                        description: item.description || 'Delicious menu item',
+                        isAvailable: item.available !== false,
+                        appliedOptionIds: item.applied_option_ids || [],
+                        options: [] // 使用全局選項庫
+                    }));
+
+                    setMenu(normalizedMenu);
+                    console.log(`✅ Loaded ${normalizedMenu.length} menu items from Supabase`);
+
+                    // 從 Supabase 加載選項庫
+                    const { data: optionsData, error: optionsError } = await window.supabaseClient
+                        .from('options_library')
+                        .select('*')
+                        .eq('is_enabled', true)
+                        .order('id');
+
+                    if (optionsError) {
+                        console.error('❌ Error loading options:', optionsError);
+                        setOptionsLibrary([]);
+                        return;
+                    }
+
+                    // 轉換數據庫字段到前端格式
+                    const normalizedLibrary = (optionsData || []).map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        type: item.type,
+                        required: item.required || false,
+                        isEnabled: item.is_enabled !== false,
+                        categories: item.categories || ['highlight', 'fried', 'bento'],
+                        choices: (item.choices || []).map(choice => ({
+                            label: choice.label,
+                            price: parseFloat(choice.price || 0),
+                            isEnabled: choice.isEnabled !== false
+                        }))
+                    }));
+
+                    setOptionsLibrary(normalizedLibrary);
+                    console.log(`✅ Loaded ${normalizedLibrary.length} options from Supabase`);
+
+                } catch (error) {
+                    console.error('❌ Error loading data from Supabase:', error);
+                    loadDataFromLocalStorage();
+                }
+            };
+
+            // 備用：從 localStorage 加載數據
+            const loadDataFromLocalStorage = () => {
+                console.log('📂 Loading data from localStorage (fallback)...');
+
                 const menuData = JSON.parse(localStorage.getItem('menu') || '[]');
-                // 向后兼容：为旧数据添加默认值
                 const normalizedMenu = menuData.map(item => ({
                     ...item,
                     isAvailable: item.isAvailable !== undefined ? item.isAvailable : true,
@@ -3244,17 +3366,14 @@
                     options: item.options || []
                 }));
                 setMenu(normalizedMenu);
-                // orders 已移除（顧客端不需要）
-                // feedback 已移除
 
-                // 向后兼容：为旧选项库数据添加默认 categories 和 choice.isEnabled
                 const libraryData = JSON.parse(localStorage.getItem('optionsLibrary') || '[]');
                 const normalizedLibrary = libraryData.map(item => ({
                     ...item,
-                    categories: item.categories || ['highlight', 'fried', 'bento'], // 默认适用所有分类
+                    categories: item.categories || ['highlight', 'fried', 'bento'],
                     choices: item.choices.map(choice => ({
                         ...choice,
-                        isEnabled: choice.isEnabled !== undefined ? choice.isEnabled : true // 默认启用
+                        isEnabled: choice.isEnabled !== undefined ? choice.isEnabled : true
                     }))
                 }));
                 setOptionsLibrary(normalizedLibrary);
@@ -3493,9 +3612,50 @@
                         updatedAt: new Date().toISOString()
                     };
 
-                    // 保存訂單到 localStorage
-                    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+                    // 保存訂單到 Supabase
+                    if (window.supabaseReady && window.supabaseClient) {
+                        try {
+                            console.log('💾 Saving order to Supabase...');
+
+                            const orderForDb = {
+                                id: newOrder.id,
+                                customer_name: customerInfo.name,
+                                phone: customerInfo.phone,
+                                service_mode: customerInfo.serviceMode || 'dine-in',
+                                items: orderItems,
+                                total: total,
+                                status: 'pending',
+                                notes: customerInfo.notes || null,
+                                scheduled_time: customerInfo.scheduledTime || null,
+                                created_at: new Date().toISOString()
+                            };
+
+                            const { data, error } = await window.supabaseClient
+                                .from('orders')
+                                .insert([orderForDb])
+                                .select();
+
+                            if (error) {
+                                console.error('❌ Error saving order to Supabase:', error);
+                                // 備用：保存到 localStorage
+                                const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                                localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+                            } else {
+                                console.log('✅ Order saved to Supabase:', data);
+                            }
+                        } catch (error) {
+                            console.error('❌ Error:', error);
+                            // 備用：保存到 localStorage
+                            const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                            localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+                        }
+                    } else {
+                        // Supabase 未就緒，使用 localStorage
+                        console.log('⚠️ Supabase not ready, saving to localStorage');
+                        const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                        localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+                    }
+
                     setCart([]);
                     setTip(0);
                     setCustomerInfo({ name: '', phone: '' });

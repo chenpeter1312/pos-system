@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>測試附加選項</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        function TestApp() {
+            const [view, setView] = useState('test');
+            
+            return (
+                <div style={{ padding: '20px' }}>
+                    <h1>測試頁面</h1>
+                    <button onClick={() => setView('test')}>測試視圖</button>
+                    
+                    {view === 'test' && (
+                        <div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ccc' }}>
+                            <h2>這是測試內容</h2>
+                            <p>如果你能看到這個，說明 React 正常運作</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<TestApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>快速配置全局選項</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #6B4423; }
+        .btn {
+            background: #6B4423;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #8B6F47; }
+        .btn-success { background: #059669; }
+        .btn-danger { background: #dc2626; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 快速配置全局選項</h1>
+        <p>點擊下方按鈕為所有菜單自動配置全局選項（辣度、飯量、口味、配菜、附加飲料、水）</p>
+
+        <button class="btn btn-success" onclick="configureAllMenus()">為所有菜單配置全局選項</button>
+        <button class="btn" onclick="configureTopMenus()">只配置前 5 個菜單</button>
+        <button class="btn btn-danger" onclick="clearConfig()">清除所有配置</button>
+
+        <div id="result"></div>
+
+        <hr style="margin: 30px 0;">
+        <h2>📋 當前狀態</h2>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function showResult(message, isSuccess) {
+            const result = document.getElementById('result');
+            result.className = `result ${isSuccess ? 'success' : 'error'}`;
+            result.innerHTML = message;
+        }
+
+        function updateStatus() {
+            const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+            const configured = menu.filter(m => m.appliedOptionIds?.length > 0);
+
+            document.getElementById('status').innerHTML = `
+                <p>📊 總菜單數：${menu.length}</p>
+                <p>✅ 已配置全局選項：${configured.length}</p>
+                <p>⏳ 未配置：${menu.length - configured.length}</p>
+                ${configured.length > 0 ? '<p><strong>已配置的菜單：</strong></p><ul>' + configured.map(m => `<li>${m.name}</li>`).join('') + '</ul>' : ''}
+            `;
+        }
+
+        function configureAllMenus() {
+            try {
+                const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+                const updated = menu.map(item => ({
+                    ...item,
+                    appliedOptionIds: [1, 2, 3, 4, 5, 6] // 所有全局選項
+                }));
+
+                localStorage.setItem('menu', JSON.stringify(updated));
+                showResult(`✅ 成功！已為 ${updated.length} 個菜單配置全局選項！<br>請重新加載前台頁面測試。`, true);
+                updateStatus();
+            } catch (e) {
+                showResult('❌ 配置失敗：' + e.message, false);
+            }
+        }
+
+        function configureTopMenus() {
+            try {
+                const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+                const updated = menu.map((item, index) => ({
+                    ...item,
+                    appliedOptionIds: index < 5 ? [1, 2, 3, 4, 5, 6] : item.appliedOptionIds
+                }));
+
+                localStorage.setItem('menu', JSON.stringify(updated));
+                showResult(`✅ 成功！已為前 5 個菜單配置全局選項！<br>請重新加載前台頁面測試。`, true);
+                updateStatus();
+            } catch (e) {
+                showResult('❌ 配置失敗：' + e.message, false);
+            }
+        }
+
+        function clearConfig() {
+            if (!confirm('確定要清除所有菜單的全局選項配置嗎？')) return;
+
+            try {
+                const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+                const updated = menu.map(item => {
+                    const newItem = { ...item };
+                    delete newItem.appliedOptionIds;
+                    return newItem;
+                });
+
+                localStorage.setItem('menu', JSON.stringify(updated));
+                showResult('✅ 已清除所有配置！', true);
+                updateStatus();
+            } catch (e) {
+                showResult('❌ 清除失敗：' + e.message, false);
+            }
+        }
+
+        // 頁面加載時更新狀態
+        window.onload = updateStatus;
+    </script>
+</body>
+</html>

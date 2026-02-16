@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据迁移到 Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <style>
+        body {
+            font-family: 'Lora', 'Noto Serif TC', serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #E8DCC8 0%, #F9F5EF 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.12);
+        }
+        h1 {
+            color: #6B4423;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6B4423;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #6B4423;
+            margin-bottom: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #8B6F47 0%, #6B4423 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            font-family: 'Lora', 'Noto Serif TC', serif;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 68, 35, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #C1272D 0%, #A01F23 100%);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #059669;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #dc2626;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        .warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .log {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 数据迁移到 Supabase</h1>
+        <p class="subtitle">将 localStorage 数据迁移到 Supabase 云端数据库</p>
+
+        <div class="step">
+            <div class="step-title">📊 当前 localStorage 数据</div>
+            <div id="local-data"></div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">🔧 操作</div>
+            <button onclick="checkConnection()">检查 Supabase 连接</button>
+            <button onclick="previewMigration()">预览迁移数据</button>
+            <button onclick="migrateData()" id="migrate-btn">开始迁移</button>
+            <button onclick="clearSupabaseData()" class="btn-danger">清空 Supabase 数据</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="log" class="log" style="display: none;"></div>
+    </div>
+
+    <script>
+        // 初始化 Supabase 客户端
+        let supabase = null;
+
+        function initSupabase() {
+            if (!window.SUPABASE_CONFIG ||
+                window.SUPABASE_CONFIG.url === 'YOUR_PROJECT_URL_HERE' ||
+                window.SUPABASE_CONFIG.anonKey === 'YOUR_ANON_KEY_HERE') {
+                showResult('⚠️ 请先在 supabase-config.js 中配置 Supabase 凭证！', 'warning');
+                return false;
+            }
+
+            try {
+                supabase = window.supabase.createClient(
+                    window.SUPABASE_CONFIG.url,
+                    window.SUPABASE_CONFIG.anonKey
+                );
+                return true;
+            } catch (e) {
+                showResult('❌ 初始化 Supabase 失败: ' + e.message, 'error');
+                return false;
+            }
+        }
+
+        function showResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+            result.style.display = 'block';
+        }
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            log.style.display = 'block';
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function checkConnection() {
+            addLog('检查 Supabase 连接...', 'info');
+
+            if (!initSupabase()) return;
+
+            try {
+                const { data, error } = await supabase.from('menu').select('count');
+                if (error) throw error;
+
+                addLog('✅ Supabase 连接成功！', 'success');
+                showResult('✅ Supabase 连接正常！可以开始迁移数据。', 'success');
+            } catch (e) {
+                addLog('❌ 连接失败: ' + e.message, 'error');
+                showResult('❌ Supabase 连接失败: ' + e.message + '<br><br>请检查：<br>1. supabase-config.js 配置是否正确<br>2. 数据库表是否已创建<br>3. RLS 策略是否已设置', 'error');
+            }
+        }
+
+        function previewMigration() {
+            const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+            const options = JSON.parse(localStorage.getItem('optionsLibrary') || '[]');
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+            showResult(`
+                📊 将要迁移的数据：<br><br>
+                🍱 菜单项目: ${menu.length} 个<br>
+                ⚙️ 选项库: ${options.length} 个<br>
+                📦 订单: ${orders.length} 个<br><br>
+                点击「开始迁移」进行迁移
+            `, 'info');
+        }
+
+        async function migrateData() {
+            if (!confirm('确定要开始迁移数据吗？这将把 localStorage 的数据上传到 Supabase。')) {
+                return;
+            }
+
+            if (!initSupabase()) return;
+
+            const migrateBtn = document.getElementById('migrate-btn');
+            migrateBtn.disabled = true;
+
+            try {
+                addLog('开始数据迁移...', 'info');
+
+                // 1. 迁移选项库
+                addLog('正在迁移选项库...', 'info');
+                const optionsLibrary = JSON.parse(localStorage.getItem('optionsLibrary') || '[]');
+                if (optionsLibrary.length > 0) {
+                    const { error: optionsError } = await supabase
+                        .from('options_library')
+                        .upsert(optionsLibrary.map(opt => ({
+                            id: opt.id,
+                            name: opt.name,
+                            type: opt.type,
+                            required: opt.required,
+                            is_enabled: opt.isEnabled !== false,
+                            categories: opt.categories || [],
+                            choices: opt.choices
+                        })));
+
+                    if (optionsError) throw new Error('选项库迁移失败: ' + optionsError.message);
+                    addLog(`✅ 成功迁移 ${optionsLibrary.length} 个选项`, 'success');
+                }
+
+                // 2. 迁移菜单
+                addLog('正在迁移菜单...', 'info');
+                const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+                if (menu.length > 0) {
+                    const { error: menuError } = await supabase
+                        .from('menu')
+                        .upsert(menu.map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            english_name: item.englishName,
+                            price: item.price,
+                            category: item.category,
+                            emoji: item.emoji,
+                            image: item.image,
+                            description: item.description,
+                            available: item.available !== false,
+                            applied_option_ids: item.appliedOptionIds || []
+                        })));
+
+                    if (menuError) throw new Error('菜单迁移失败: ' + menuError.message);
+                    addLog(`✅ 成功迁移 ${menu.length} 个菜单项目`, 'success');
+                }
+
+                // 3. 迁移订单
+                addLog('正在迁移订单...', 'info');
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                if (orders.length > 0) {
+                    const { error: ordersError } = await supabase
+                        .from('orders')
+                        .upsert(orders.map(order => ({
+                            id: order.id,
+                            customer_name: order.customerName,
+                            phone: order.phone,
+                            service_mode: order.serviceMode,
+                            items: order.items,
+                            total: order.total,
+                            status: order.status || 'pending',
+                            notes: order.notes,
+                            scheduled_time: order.scheduledTime,
+                            created_at: order.timestamp
+                        })));
+
+                    if (ordersError) throw new Error('订单迁移失败: ' + ordersError.message);
+                    addLog(`✅ 成功迁移 ${orders.length} 个订单`, 'success');
+                }
+
+                addLog('🎉 数据迁移完成！', 'success');
+                showResult(`
+                    🎉 数据迁移成功！<br><br>
+                    ✅ 选项库: ${optionsLibrary.length} 个<br>
+                    ✅ 菜单: ${menu.length} 个<br>
+                    ✅ 订单: ${orders.length} 个<br><br>
+                    现在可以修改代码使用 Supabase API 了！
+                `, 'success');
+            } catch (e) {
+                addLog('❌ 迁移失败: ' + e.message, 'error');
+                showResult('❌ 数据迁移失败: ' + e.message, 'error');
+            } finally {
+                migrateBtn.disabled = false;
+            }
+        }
+
+        async function clearSupabaseData() {
+            if (!confirm('⚠️ 警告：这将删除 Supabase 中的所有数据！确定继续吗？')) {
+                return;
+            }
+
+            if (!initSupabase()) return;
+
+            try {
+                addLog('清空 Supabase 数据...', 'info');
+
+                await supabase.from('orders').delete().neq('id', 0);
+                addLog('✅ 订单数据已清空', 'success');
+
+                await supabase.from('menu').delete().neq('id', 0);
+                addLog('✅ 菜单数据已清空', 'success');
+
+                await supabase.from('options_library').delete().neq('id', 0);
+                addLog('✅ 选项库数据已清空', 'success');
+
+                showResult('✅ Supabase 数据已全部清空！', 'success');
+            } catch (e) {
+                addLog('❌ 清空失败: ' + e.message, 'error');
+                showResult('❌ 清空数据失败: ' + e.message, 'error');
+            }
+        }
+
+        // 页面加载时显示本地数据
+        window.onload = function() {
+            const menu = JSON.parse(localStorage.getItem('menu') || '[]');
+            const options = JSON.parse(localStorage.getItem('optionsLibrary') || '[]');
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+
+            document.getElementById('local-data').innerHTML = `
+                🍱 菜单项目: <strong>${menu.length}</strong> 个<br>
+                ⚙️ 选项库: <strong>${options.length}</strong> 个<br>
+                📦 订单: <strong>${orders.length}</strong> 个
+            `;
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDN 测试</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 40px;
+            background: #1e1e1e;
+            color: #00ff00;
+        }
+        .result {
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #2d2d2d;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Supabase CDN 加载测试</h1>
+    <div id="results"></div>
+
+    <!-- 测试不同的 CDN 源 -->
+    <script>
+        var results = document.getElementById('results');
+
+        function addResult(message, isSuccess) {
+            var div = document.createElement('div');
+            div.className = 'result ' + (isSuccess ? 'success' : 'error');
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        // 测试 1：检查脚本加载
+        addResult('测试 1：检查页面基本 JavaScript...', true);
+        addResult('✅ JavaScript 可以运行', true);
+
+        // 测试 2：尝试加载 jsdelivr CDN
+        addResult('\n测试 2：尝试加载 jsdelivr CDN...', true);
+
+        var script1 = document.createElement('script');
+        script1.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js';
+        script1.onload = function() {
+            addResult('✅ jsdelivr CDN 加载成功', true);
+            checkSupabase();
+        };
+        script1.onerror = function() {
+            addResult('❌ jsdelivr CDN 加载失败', false);
+            tryUnpkg();
+        };
+        document.head.appendChild(script1);
+
+        function checkSupabase() {
+            setTimeout(function() {
+                if (window.supabase) {
+                    addResult('✅ window.supabase 存在', true);
+                    addResult('✅ 类型: ' + typeof window.supabase.createClient, true);
+
+                    // 尝试创建客户端
+                    try {
+                        var client = window.supabase.createClient(
+                            'https://test.supabase.co',
+                            'test-key'
+                        );
+                        addResult('✅ 可以创建 Supabase 客户端', true);
+                        addResult('\n🎉 所有测试通过！CDN 工作正常', true);
+                    } catch (e) {
+                        addResult('❌ 创建客户端失败: ' + e.message, false);
+                    }
+                } else {
+                    addResult('❌ window.supabase 不存在', false);
+                    addResult('可用的全局对象: ' + Object.keys(window).filter(function(k) {
+                        return k.toLowerCase().includes('supabase');
+                    }).join(', '), false);
+                }
+            }, 500);
+        }
+
+        function tryUnpkg() {
+            addResult('\n测试 3：尝试 unpkg CDN 作为备用...', true);
+
+            var script2 = document.createElement('script');
+            script2.src = 'https://unpkg.com/@supabase/supabase-js@2.39.3/dist/umd/supabase.js';
+            script2.onload = function() {
+                addResult('✅ unpkg CDN 加载成功', true);
+                checkSupabase();
+            };
+            script2.onerror = function() {
+                addResult('❌ unpkg CDN 也加载失败', false);
+                addResult('\n建议检查：', false);
+                addResult('1. 网络连接', false);
+                addResult('2. Safari 内容阻止器', false);
+                addResult('3. 防火墙设置', false);
+            };
+            document.head.appendChild(script2);
+        }
+
+        // 5秒超时检测
+        setTimeout(function() {
+            if (!window.supabase) {
+                addResult('\n⏱️ 5秒超时 - CDN 未能加载', false);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
