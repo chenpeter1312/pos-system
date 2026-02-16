@@ -977,7 +977,7 @@
         }
 
         // 菜單管理組件
-        function MenuManagement({ menu, onUpdateMenu }) {
+        function MenuManagement({ menu, onUpdateMenu, optionsLibrary = [] }) {
             const [editingItem, setEditingItem] = useState(null);
             const [showModal, setShowModal] = useState(false);
             const [filter, setFilter] = useState('all');
@@ -1127,6 +1127,7 @@
                                 setShowModal(false);
                                 setEditingItem(null);
                             }}
+                            optionsLibrary={optionsLibrary}
                         />
                     )}
                 </div>
@@ -1134,11 +1135,19 @@
         }
 
         // 菜單項目編輯 Modal
-        function MenuItemModal({ item, onSave, onClose }) {
+        function MenuItemModal({ item, onSave, onClose, optionsLibrary = [] }) {
             const [formData, setFormData] = useState(item);
 
             const handleChange = (field, value) => {
                 setFormData({ ...formData, [field]: value });
+            };
+
+            const handleToggleOption = (optionId) => {
+                const currentIds = formData.appliedOptionIds || [];
+                const newIds = currentIds.includes(optionId)
+                    ? currentIds.filter(id => id !== optionId)
+                    : [...currentIds, optionId];
+                setFormData({ ...formData, appliedOptionIds: newIds });
             };
 
             const handleSubmit = (e) => {
@@ -1228,6 +1237,66 @@
                                 </label>
                                 <label>供應中</label>
                             </div>
+
+                            {/* 全局選項選擇 */}
+                            {optionsLibrary.length > 0 && (
+                                <div className="form-group">
+                                    <label style={{ marginBottom: '12px', display: 'block' }}>
+                                        🎯 應用全局選項（顧客點餐時可選擇）
+                                    </label>
+                                    <div style={{
+                                        border: '1px solid #e0e0e0',
+                                        borderRadius: '8px',
+                                        padding: '12px',
+                                        background: '#f9f9f9'
+                                    }}>
+                                        {optionsLibrary.filter(opt => opt.isEnabled !== false).map(option => (
+                                            <div key={option.id} style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                padding: '8px',
+                                                marginBottom: '8px',
+                                                background: 'white',
+                                                borderRadius: '6px',
+                                                border: (formData.appliedOptionIds || []).includes(option.id)
+                                                    ? '2px solid #059669'
+                                                    : '1px solid #e0e0e0',
+                                                cursor: 'pointer'
+                                            }} onClick={() => handleToggleOption(option.id)}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={(formData.appliedOptionIds || []).includes(option.id)}
+                                                    onChange={() => handleToggleOption(option.id)}
+                                                    style={{ marginRight: '10px', width: '18px', height: '18px', cursor: 'pointer' }}
+                                                />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: '600', color: '#333' }}>
+                                                        {option.name}
+                                                        {option.required && (
+                                                            <span style={{
+                                                                marginLeft: '8px',
+                                                                fontSize: '12px',
+                                                                color: '#ef4444',
+                                                                background: '#fee2e2',
+                                                                padding: '2px 6px',
+                                                                borderRadius: '4px'
+                                                            }}>必選</span>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                                                        {option.type === 'single' ? '單選' : '多選'} •
+                                                        {option.choices.filter(c => c.isEnabled !== false).map(c => c.label).join(', ')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: '#666', marginTop: '8px' }}>
+                                        💡 勾選後，顧客點此餐時會彈出選項讓他們選擇
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="btn-group">
                                 <button type="button" className="btn btn-secondary" onClick={onClose}>
                                     取消
@@ -1638,6 +1707,7 @@
                                     <MenuManagement
                                         menu={menu}
                                         onUpdateMenu={handleUpdateMenu}
+                                        optionsLibrary={optionsLibrary}
                                     />
                                 )}
                                 {currentView === 'options' && (
