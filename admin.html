@@ -729,6 +729,46 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // 上傳圖片到 Supabase Storage
+        const uploadImageToSupabase = async (file) => {
+            try {
+                if (!window.supabaseClient) {
+                    throw new Error('Supabase client not initialized');
+                }
+
+                // 生成唯一文件名
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                const filePath = `menu/${fileName}`;
+
+                console.log('📤 Uploading image:', filePath);
+
+                // 上傳文件到 Storage
+                const { data, error } = await window.supabaseClient.storage
+                    .from('menu-images')
+                    .upload(filePath, file, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) {
+                    console.error('❌ Upload error:', error);
+                    throw error;
+                }
+
+                // 獲取公開 URL
+                const { data: urlData } = window.supabaseClient.storage
+                    .from('menu-images')
+                    .getPublicUrl(filePath);
+
+                console.log('✅ Image uploaded:', urlData.publicUrl);
+                return urlData.publicUrl;
+            } catch (error) {
+                console.error('❌ Error uploading image:', error);
+                throw error;
+            }
+        };
+
         // 從 Supabase 加載數據
         const loadFromSupabase = async (table) => {
             try {
@@ -1391,9 +1431,92 @@
                                 />
                             </div>
                             <div className="form-group">
-                                <label>圖片網址</label>
+                                <label>圖片</label>
+
+                                {/* 图片预览 */}
+                                {formData.image && (
+                                    <div style={{
+                                        marginBottom: '10px',
+                                        border: '2px solid #e0e0e0',
+                                        borderRadius: '8px',
+                                        padding: '10px',
+                                        background: '#f9f9f9'
+                                    }}>
+                                        <img
+                                            src={formData.image}
+                                            alt="商品圖片"
+                                            style={{
+                                                maxWidth: '200px',
+                                                maxHeight: '200px',
+                                                borderRadius: '6px',
+                                                display: 'block',
+                                                marginBottom: '8px'
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            style={{ fontSize: '12px', padding: '4px 8px' }}
+                                            onClick={() => handleChange('image', '')}
+                                        >
+                                            🗑️ 移除圖片
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* 文件上传 */}
+                                <div style={{ marginBottom: '10px' }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        id="imageUpload"
+                                        style={{ display: 'none' }}
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            // 檢查文件大小（最大 2MB）
+                                            if (file.size > 2 * 1024 * 1024) {
+                                                alert('圖片檔案太大！請選擇小於 2MB 的圖片。');
+                                                return;
+                                            }
+
+                                            try {
+                                                const uploadBtn = document.querySelector('.upload-status');
+                                                if (uploadBtn) uploadBtn.textContent = '⏳ 上傳中...';
+
+                                                const imageUrl = await uploadImageToSupabase(file);
+                                                handleChange('image', imageUrl);
+
+                                                if (uploadBtn) uploadBtn.textContent = '✅ 上傳成功！';
+                                                setTimeout(() => {
+                                                    if (uploadBtn) uploadBtn.textContent = '';
+                                                }, 2000);
+                                            } catch (error) {
+                                                alert('圖片上傳失敗：' + error.message);
+                                                console.error(error);
+                                            }
+                                            e.target.value = ''; // 重置文件输入
+                                        }}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => document.getElementById('imageUpload').click()}
+                                        style={{ marginRight: '10px' }}
+                                    >
+                                        📷 選擇圖片上傳
+                                    </button>
+                                    <span className="upload-status" style={{ color: '#059669', fontWeight: '600' }}></span>
+                                </div>
+
+                                {/* 手动输入 URL（可选） */}
+                                <div style={{ fontSize: '12px', color: '#666', marginBottom: '6px' }}>
+                                    或手動輸入圖片網址：
+                                </div>
                                 <input
                                     type="text"
+                                    placeholder="https://..."
                                     value={formData.image}
                                     onChange={(e) => handleChange('image', e.target.value)}
                                 />
