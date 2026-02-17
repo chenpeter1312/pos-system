@@ -1185,20 +1185,22 @@
 
         /* 店面资讯顶部区域 */
         .store-header {
-            /* 木头背景纹理 */
+            /* 深色木头背景 + 渐层遮罩 */
             background:
                 linear-gradient(
-                    rgba(255, 255, 255, 0.85),
-                    rgba(255, 255, 255, 0.85)
+                    135deg,
+                    rgba(255, 255, 255, 0.90) 0%,
+                    rgba(255, 255, 255, 0.85) 50%,
+                    rgba(255, 255, 255, 0.80) 100%
                 ),
-                url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=1200&q=80') center/cover no-repeat;
-            /* Fallback 背景色 */
-            background-color: #D4A574;
+                url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&q=80') center/cover no-repeat;
+            /* Fallback 背景色 - 深木质色 */
+            background-color: #8B6F47;
             padding: 32px 60px;
-            border-bottom: 1px solid #d4a574;
+            border-bottom: 1px solid #8B6F47;
             position: relative;
             border-radius: 0 0 12px 12px;
-            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.1);
+            box-shadow: 0 2px 8px rgba(107, 68, 35, 0.15);
         }
 
         .top-nav {
@@ -1488,14 +1490,16 @@
         @media (max-width: 767px) {
             .store-header {
                 padding: 24px 20px;
-                /* Mobile 上遮罩更白，确保文字清晰 */
+                /* Mobile 上渐层遮罩更白，确保文字清晰 */
                 background:
                     linear-gradient(
-                        rgba(255, 255, 255, 0.92),
-                        rgba(255, 255, 255, 0.92)
+                        135deg,
+                        rgba(255, 255, 255, 0.94) 0%,
+                        rgba(255, 255, 255, 0.90) 50%,
+                        rgba(255, 255, 255, 0.88) 100%
                     ),
-                    url('https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80') center/cover no-repeat;
-                background-color: #D4A574;
+                    url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80') center/cover no-repeat;
+                background-color: #8B6F47;
             }
 
             .store-name {
