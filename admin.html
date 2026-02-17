@@ -1262,6 +1262,7 @@
             const [editingItem, setEditingItem] = useState(null);
             const [showModal, setShowModal] = useState(false);
             const [filter, setFilter] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
 
             const categories = {
                 all: '全部',
@@ -1271,9 +1272,28 @@
                 drinks: '飲料'
             };
 
-            const filteredMenu = filter === 'all'
-                ? menu
-                : menu.filter(item => item.category === filter);
+            // 分類顏色配置
+            const categoryColors = {
+                highlight: { bg: '#FFF3E0', color: '#E65100', icon: '⭐' },
+                fried: { bg: '#FFF9C4', color: '#F57F17', icon: '🍗' },
+                bento: { bg: '#E8F5E9', color: '#2E7D32', icon: '🍱' },
+                drinks: { bg: '#E3F2FD', color: '#1565C0', icon: '🥤' }
+            };
+
+            // 過濾邏輯：分類 + 搜尋
+            const filteredMenu = menu.filter(item => {
+                // 分類過濾
+                const matchCategory = filter === 'all' || item.category === filter;
+
+                // 搜尋過濾（支援中英文、價格）
+                const searchLower = searchTerm.toLowerCase();
+                const matchSearch = !searchTerm ||
+                    item.name.toLowerCase().includes(searchLower) ||
+                    (item.englishName && item.englishName.toLowerCase().includes(searchLower)) ||
+                    item.price.toString().includes(searchLower);
+
+                return matchCategory && matchSearch;
+            });
 
             const handleSaveItem = (item) => {
                 const updatedMenu = editingItem.id
@@ -1300,6 +1320,67 @@
 
             return (
                 <div>
+                    {/* 搜尋欄 */}
+                    <div style={{
+                        marginBottom: '20px',
+                        padding: '15px 20px',
+                        background: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ position: 'relative' }}>
+                            <span style={{
+                                position: 'absolute',
+                                left: '15px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                fontSize: '18px',
+                                color: '#999'
+                            }}>🔍</span>
+                            <input
+                                type="text"
+                                placeholder="搜尋菜單名稱、英文名或價格..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 15px 12px 45px',
+                                    border: '2px solid #E8DCC8',
+                                    borderRadius: '8px',
+                                    fontSize: '15px',
+                                    outline: 'none',
+                                    transition: 'border-color 0.3s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#8B6F47'}
+                                onBlur={(e) => e.target.style.borderColor = '#E8DCC8'}
+                            />
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm('')}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '15px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '18px',
+                                        cursor: 'pointer',
+                                        color: '#999'
+                                    }}
+                                >✕</button>
+                            )}
+                        </div>
+                        <div style={{
+                            marginTop: '10px',
+                            fontSize: '13px',
+                            color: '#666'
+                        }}>
+                            找到 {filteredMenu.length} 個菜單項目
+                        </div>
+                    </div>
+
+                    {/* 分類與新增按鈕 */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             {Object.entries(categories).map(([key, label]) => (
@@ -1357,22 +1438,42 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{categories[item.category]}</td>
+                                    <td>
+                                        <span style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            fontSize: '13px',
+                                            fontWeight: '500',
+                                            backgroundColor: categoryColors[item.category]?.bg || '#f5f5f5',
+                                            color: categoryColors[item.category]?.color || '#666'
+                                        }}>
+                                            {categoryColors[item.category]?.icon} {categories[item.category]}
+                                        </span>
+                                    </td>
                                     <td style={{ fontWeight: 'bold', color: '#6B4423' }}>
                                         ${item.price.toFixed(2)}
                                     </td>
                                     <td>
-                                        <label className="toggle-switch">
-                                            <input
-                                                type="checkbox"
-                                                checked={item.available !== false}
-                                                onChange={() => handleToggleAvailability(item.id)}
-                                            />
-                                            <span className="toggle-slider"></span>
-                                        </label>
-                                        <span style={{ marginLeft: '10px', fontSize: '13px' }}>
-                                            {item.available !== false ? '供應中' : '已售罄'}
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.available !== false}
+                                                    onChange={() => handleToggleAvailability(item.id)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                            <span style={{
+                                                fontSize: '13px',
+                                                fontWeight: '500',
+                                                color: item.available !== false ? '#2E7D32' : '#757575'
+                                            }}>
+                                                {item.available !== false ? '✓ 供應中' : '✕ 已停售'}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '5px' }}>
