@@ -1805,6 +1805,61 @@
                 font-size: 18px !important;
             }
         }
+
+        /* 订单追踪 Modal 样式 */
+        .tracking-modal {
+            max-width: 600px;
+        }
+
+        .progress-tracker::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background: #e7e5e4;
+            z-index: 0;
+        }
+
+        /* 语言切换按钮样式 */
+        .language-toggle-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--wood-light);
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            fontWeight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .language-toggle-btn:hover {
+            background: var(--cream);
+            border-color: var(--wood-medium);
+        }
+
+        /* 追踪订单按钮样式 */
+        .track-order-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--taiwan-green);
+            background: var(--taiwan-green);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            fontWeight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .track-order-btn:hover {
+            background: #3a6e45;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(47, 82, 51, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -3230,6 +3285,186 @@
             }
         };
 
+        // 多语言翻译字典
+        const translations = {
+            zh: {
+                // Header
+                appTitle: "Lee's Taiwanese Comfort Food",
+                trackOrder: '追蹤訂單',
+
+                // Mode Selector
+                welcomeTitle: "Lee's Taiwanese Comfort Food",
+                selectMode: '請選擇用餐方式',
+                dineIn: '內用',
+                dineInTitle: '內用 Dine-in',
+                dineInDesc: '在店內享用美味餐點',
+                takeout: '外帶',
+                takeoutTitle: '外帶 Take-out',
+                takeoutDesc: '外帶回家或辦公室享用',
+                scheduled: '預約取餐',
+                scheduledTitle: '預約取餐 Schedule Pickup',
+                scheduledDesc: '選擇您方便的取餐時間',
+                selectTime: '選擇取餐時間',
+                confirm: '確認',
+
+                // Categories
+                allItems: '全部菜色',
+                highlight: '小店精選',
+                fried: '炸物',
+                bento: '便當/蓋飯',
+
+                // Cart
+                cart: '購物車',
+                checkout: '結帳',
+                emptyCart: '購物車是空的',
+                subtotal: '小計',
+                tax: '稅',
+                tip: '小費',
+                total: '總計',
+                noTip: '不給小費',
+
+                // Checkout
+                customerInfo: '顧客資訊',
+                name: '姓名',
+                phone: '電話',
+                notes: '備註',
+                optional: '選填',
+                paymentInfo: '付款資訊',
+                cardholderName: '持卡人姓名',
+                processing: '處理中...',
+                placeOrder: '送出訂單',
+
+                // Order Tracking
+                orderNumber: '訂單編號',
+                enterOrderId: '輸入訂單編號',
+                enterPhone: '輸入電話號碼',
+                searchOrder: '查詢訂單',
+                orderReceived: '訂單已接收',
+                orderReceivedDesc: '我們正在準備您的餐點',
+                preparing: '製作中',
+                preparingDesc: '您的餐點正在製作中',
+                readyForPickup: '可取餐',
+                readyForPickupDesc: '您的餐點已準備完成',
+                orderCancelled: '訂單已取消',
+                orderCancelledDesc: '如有疑問請聯繫我們',
+                estimatedTime: '預計等待時間',
+                minutes: '分鐘',
+                readyNow: '可立即取餐',
+
+                // Messages
+                paymentSuccess: '付款成功！',
+                thankYou: '感謝您的訂購！',
+                orderNotFound: '找不到訂單或電話號碼不匹配',
+                pleaseFillRequired: '請填寫所有必填欄位',
+                pleaseFillNamePhone: '請填寫姓名和電話',
+                pleaseFillCardholder: '請填寫持卡人姓名',
+                itemSoldOut: '此商品暫時售罄，請選擇其他商品',
+                itemsInCartSoldOut: '購物車中有商品已售罄',
+
+                // Actions
+                addToCart: '加入購物車',
+                add: '加入',
+                remove: '移除',
+                cancel: '取消',
+                close: '關閉',
+                search: '搜尋',
+                searchMenu: '搜尋菜色...',
+                soldOut: '已售罄',
+
+                // Options
+                selectOptions: '請選擇',
+                required: '必選'
+            },
+            en: {
+                // Header
+                appTitle: "Lee's Taiwanese Comfort Food",
+                trackOrder: 'Track Order',
+
+                // Mode Selector
+                welcomeTitle: "Lee's Taiwanese Comfort Food",
+                selectMode: 'Select Dining Mode',
+                dineIn: 'Dine-in',
+                dineInTitle: 'Dine-in',
+                dineInDesc: 'Enjoy your meal in our restaurant',
+                takeout: 'Take-out',
+                takeoutTitle: 'Take-out',
+                takeoutDesc: 'Take your food home or to office',
+                scheduled: 'Schedule Pickup',
+                scheduledTitle: 'Schedule Pickup',
+                scheduledDesc: 'Choose your convenient pickup time',
+                selectTime: 'Select Pickup Time',
+                confirm: 'Confirm',
+
+                // Categories
+                allItems: 'All Items',
+                highlight: 'Highlights',
+                fried: 'Fried Foods',
+                bento: 'Bento/Rice Bowl',
+
+                // Cart
+                cart: 'Cart',
+                checkout: 'Checkout',
+                emptyCart: 'Your cart is empty',
+                subtotal: 'Subtotal',
+                tax: 'Tax',
+                tip: 'Tip',
+                total: 'Total',
+                noTip: 'No Tip',
+
+                // Checkout
+                customerInfo: 'Customer Information',
+                name: 'Name',
+                phone: 'Phone',
+                notes: 'Notes',
+                optional: 'Optional',
+                paymentInfo: 'Payment Information',
+                cardholderName: 'Cardholder Name',
+                processing: 'Processing...',
+                placeOrder: 'Place Order',
+
+                // Order Tracking
+                orderNumber: 'Order Number',
+                enterOrderId: 'Enter Order ID',
+                enterPhone: 'Enter Phone Number',
+                searchOrder: 'Search Order',
+                orderReceived: 'Order Received',
+                orderReceivedDesc: 'We are preparing your food',
+                preparing: 'Preparing',
+                preparingDesc: 'Your food is being prepared',
+                readyForPickup: 'Ready for Pickup',
+                readyForPickupDesc: 'Your food is ready',
+                orderCancelled: 'Order Cancelled',
+                orderCancelledDesc: 'Please contact us if you have questions',
+                estimatedTime: 'Estimated Wait Time',
+                minutes: 'minutes',
+                readyNow: 'Ready Now',
+
+                // Messages
+                paymentSuccess: 'Payment Successful!',
+                thankYou: 'Thank you for your order!',
+                orderNotFound: 'Order not found or phone number does not match',
+                pleaseFillRequired: 'Please fill in all required fields',
+                pleaseFillNamePhone: 'Please fill in name and phone',
+                pleaseFillCardholder: 'Please fill in cardholder name',
+                itemSoldOut: 'This item is temporarily sold out',
+                itemsInCartSoldOut: 'Some items in cart are sold out',
+
+                // Actions
+                addToCart: 'Add to Cart',
+                add: 'Add',
+                remove: 'Remove',
+                cancel: 'Cancel',
+                close: 'Close',
+                search: 'Search',
+                searchMenu: 'Search menu...',
+                soldOut: 'Sold Out',
+
+                // Options
+                selectOptions: 'Please Select',
+                required: 'Required'
+            }
+        };
+
         function App() {
             // 移除了管理相關的 state: currentView, isAdminLoggedIn
             const [menu, setMenu] = useState([]);
@@ -3251,22 +3486,134 @@
             const [selectedCategory, setSelectedCategory] = useState('all');
             const [optionsLibrary, setOptionsLibrary] = useState([]);
 
+            // 订单追踪状态
+            const [showTrackingModal, setShowTrackingModal] = useState(false);
+            const [trackingOrder, setTrackingOrder] = useState(null);
+            const [trackingInput, setTrackingInput] = useState({ orderId: '', phone: '' });
+            const [isLoadingTracking, setIsLoadingTracking] = useState(false);
+
+            // 多语言状态
+            const [language, setLanguage] = useState(function() {
+                const saved = localStorage.getItem('preferredLanguage');
+                if (saved) return saved;
+                const browserLang = navigator.language.toLowerCase();
+                return browserLang.indexOf('zh') >= 0 ? 'zh' : 'en';
+            }());
+
             const TAX_RATE = 0.0825;
 
+            // 多语言函数
+            const t = function(key) {
+                return translations[language][key] || key;
+            };
+
+            const toggleLanguage = function() {
+                const newLang = language === 'zh' ? 'en' : 'zh';
+                setLanguage(newLang);
+                localStorage.setItem('preferredLanguage', newLang);
+            };
+
+            // 订单状态配置
+            const orderStatusConfig = {
+                pending: {
+                    step: 1,
+                    icon: '📝',
+                    color: '#F59E0B'
+                },
+                accepted: {
+                    step: 2,
+                    icon: '👨‍🍳',
+                    color: '#3B82F6'
+                },
+                completed: {
+                    step: 3,
+                    icon: '✅',
+                    color: '#10B981'
+                },
+                cancelled: {
+                    step: 0,
+                    icon: '❌',
+                    color: '#EF4444'
+                }
+            };
+
+            // 计算预估等待时间
+            const calculateEstimatedTime = function(order) {
+                if (!order) return 0;
+
+                const baseTime = 15;
+                const itemCount = order.items.reduce(function(sum, item) {
+                    return sum + item.quantity;
+                }, 0);
+                const itemAdjustment = Math.floor(itemCount / 3) * 2;
+
+                var statusAdjustment = 0;
+                if (order.status === 'accepted') {
+                    statusAdjustment = -Math.floor((baseTime + itemAdjustment) / 2);
+                } else if (order.status === 'completed') {
+                    return 0;
+                }
+
+                const elapsedMinutes = Math.floor((new Date() - new Date(order.created_at)) / 60000);
+                const totalEstimated = baseTime + itemAdjustment + statusAdjustment;
+                return Math.max(0, totalEstimated - elapsedMinutes);
+            };
+
+            // 订单追踪查询函数
+            const trackOrder = async function(orderId, phone) {
+                if (!window.supabaseClient) {
+                    return { success: false, message: t('orderNotFound') };
+                }
+
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .eq('id', parseInt(orderId))
+                        .eq('phone', phone)
+                        .single();
+
+                    if (error || !data) {
+                        return { success: false, message: t('orderNotFound') };
+                    }
+                    return { success: true, order: data };
+                } catch (err) {
+                    console.error('Track order error:', err);
+                    return { success: false, message: t('orderNotFound') };
+                }
+            };
+
             // 辅助函数：获取分类名称
-            const getCategoryName = (categoryId) => {
-                const categoryMap = {
-                    'highlight': '小店精選',
-                    'fried': '炸物',
-                    'bento': '便當/蓋飯'
-                };
-                return categoryMap[categoryId] || categoryId;
+            const getCategoryName = function(categoryId) {
+                if (categoryId === 'all') return t('allItems');
+                if (categoryId === 'highlight') return t('highlight');
+                if (categoryId === 'fried') return t('fried');
+                if (categoryId === 'bento') return t('bento');
+                return categoryId;
             };
 
             useEffect(() => {
                 initData();
                 loadData();
             }, []);
+
+            // 订单追踪轮询刷新
+            useEffect(function() {
+                if (!trackingOrder || !showTrackingModal) {
+                    return;
+                }
+
+                const refreshInterval = setInterval(async function() {
+                    const result = await trackOrder(trackingOrder.id, trackingOrder.phone);
+                    if (result.success) {
+                        setTrackingOrder(result.order);
+                    }
+                }, 5000);
+
+                return function() {
+                    clearInterval(refreshInterval);
+                };
+            }, [trackingOrder, showTrackingModal]);
 
             const loadData = async () => {
                 try {
@@ -3662,7 +4009,16 @@
                     setCardholderName('');
                     setIsProcessingPayment(false);
                     setShowCheckoutModal(false);
-                    alert(`✅ 付款成功！\n訂單編號：${newOrder.orderNumber}\n付款方式：信用卡\n\n感謝您的訂購！`);
+
+                    alert(`✅ ${t('paymentSuccess')}\n${t('orderNumber')}：${newOrder.orderNumber}\n\n${t('thankYou')}`);
+
+                    // 自动打开订单追踪 Modal
+                    setTrackingOrder(newOrder);
+                    setTrackingInput({
+                        orderId: newOrder.id.toString(),
+                        phone: newOrder.customer.phone
+                    });
+                    setShowTrackingModal(true);
                 } catch (error) {
                     setIsProcessingPayment(false);
                     alert('付款失敗，請重試');
@@ -3833,11 +4189,25 @@
 
             return (
                 <div className="app">
-                    <div className="header">
-                        <h1 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                    <div className="header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px' }}>
+                        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
                             <img src="https://raw.githubusercontent.com/chenpeter1312/pos-system/main/logo.jpeg" alt="Lee's Logo" style={{ height: '40px', width: '40px', objectFit: 'contain', borderRadius: '50%' }} />
-                            點餐系統
+                            {t('appTitle')}
                         </h1>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <button
+                                className="track-order-btn"
+                                onClick={function() { setShowTrackingModal(true); }}
+                            >
+                                📦 {t('trackOrder')}
+                            </button>
+                            <button
+                                className="language-toggle-btn"
+                                onClick={toggleLanguage}
+                            >
+                                {language === 'zh' ? '🇺🇸 EN' : '🇹🇼 中文'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="content">
@@ -4817,6 +5187,238 @@
                                         })()}
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 訂單追蹤 Modal */}
+                    {showTrackingModal && (
+                        <div className="modal" onClick={function() { setShowTrackingModal(false); }}>
+                            <div className="modal-content tracking-modal" onClick={function(e) { e.stopPropagation(); }}>
+                                <div className="modal-header">
+                                    <span>📦 {t('trackOrder')}</span>
+                                    <button
+                                        onClick={function() {
+                                            setShowTrackingModal(false);
+                                            setTrackingOrder(null);
+                                            setTrackingInput({ orderId: '', phone: '' });
+                                        }}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            fontSize: '24px',
+                                            cursor: 'pointer',
+                                            color: '#78716c',
+                                            padding: '0',
+                                            lineHeight: '1'
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                {!trackingOrder ? (
+                                    <div style={{ padding: '20px 0' }}>
+                                        <div style={{ marginBottom: '20px', color: '#78716c', textAlign: 'center' }}>
+                                            {t('enterOrderId')} & {t('enterPhone')}
+                                        </div>
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#292524' }}>
+                                                {t('orderNumber')}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder={t('enterOrderId')}
+                                                value={trackingInput.orderId}
+                                                onChange={function(e) {
+                                                    setTrackingInput({ orderId: e.target.value, phone: trackingInput.phone });
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '12px',
+                                                    border: '2px solid #e7e5e4',
+                                                    borderRadius: '8px',
+                                                    fontSize: '16px'
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{ marginBottom: '20px' }}>
+                                            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#292524' }}>
+                                                {t('phone')}
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                placeholder={t('enterPhone')}
+                                                value={trackingInput.phone}
+                                                onChange={function(e) {
+                                                    setTrackingInput({ orderId: trackingInput.orderId, phone: e.target.value });
+                                                }}
+                                                style={{
+                                                    width: '100%',
+                                                    padding: '12px',
+                                                    border: '2px solid #e7e5e4',
+                                                    borderRadius: '8px',
+                                                    fontSize: '16px'
+                                                }}
+                                            />
+                                        </div>
+                                        <button
+                                            className="btn btn-primary"
+                                            disabled={isLoadingTracking}
+                                            onClick={async function() {
+                                                if (!trackingInput.orderId || !trackingInput.phone) {
+                                                    alert(t('pleaseFillRequired'));
+                                                    return;
+                                                }
+                                                setIsLoadingTracking(true);
+                                                const result = await trackOrder(trackingInput.orderId, trackingInput.phone);
+                                                setIsLoadingTracking(false);
+                                                if (result.success) {
+                                                    setTrackingOrder(result.order);
+                                                } else {
+                                                    alert(result.message);
+                                                }
+                                            }}
+                                            style={{ width: '100%', fontSize: '16px', fontWeight: '600' }}
+                                        >
+                                            {isLoadingTracking ? t('processing') : t('searchOrder')}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div style={{ padding: '20px 0' }}>
+                                        <div style={{
+                                            background: '#f5f5f4',
+                                            padding: '16px',
+                                            borderRadius: '8px',
+                                            marginBottom: '30px',
+                                            textAlign: 'center'
+                                        }}>
+                                            <div style={{ fontSize: '14px', color: '#78716c', marginBottom: '4px' }}>
+                                                {t('orderNumber')}
+                                            </div>
+                                            <div style={{ fontSize: '24px', fontWeight: '700', color: '#2d5016' }}>
+                                                #{trackingOrder.id}
+                                            </div>
+                                        </div>
+
+                                        <div className="progress-tracker" style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            marginBottom: '30px',
+                                            position: 'relative'
+                                        }}>
+                                            {['pending', 'accepted', 'completed'].map(function(status, idx) {
+                                                const config = orderStatusConfig[status];
+                                                const currentConfig = orderStatusConfig[trackingOrder.status];
+                                                const isActive = trackingOrder.status === status;
+                                                const isCompleted = currentConfig && config.step < currentConfig.step;
+                                                const isCancelled = trackingOrder.status === 'cancelled';
+
+                                                return (
+                                                    <div
+                                                        key={status}
+                                                        style={{
+                                                            flex: 1,
+                                                            textAlign: 'center',
+                                                            position: 'relative',
+                                                            zIndex: 1
+                                                        }}
+                                                    >
+                                                        <div style={{
+                                                            width: '60px',
+                                                            height: '60px',
+                                                            borderRadius: '50%',
+                                                            background: isCancelled ? '#f5f5f4' : (isActive || isCompleted ? config.color : '#f5f5f4'),
+                                                            color: isCancelled ? '#a8a29e' : (isActive || isCompleted ? 'white' : '#a8a29e'),
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '30px',
+                                                            margin: '0 auto 12px',
+                                                            border: isCancelled ? '3px solid #e7e5e4' : (isActive ? '3px solid ' + config.color : 'none'),
+                                                            boxShadow: isActive && !isCancelled ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'
+                                                        }}>
+                                                            {isCompleted ? '✓' : config.icon}
+                                                        </div>
+                                                        <div style={{
+                                                            fontSize: '14px',
+                                                            fontWeight: isActive ? '700' : '600',
+                                                            color: isActive && !isCancelled ? config.color : '#292524',
+                                                            marginBottom: '4px'
+                                                        }}>
+                                                            {t(status === 'pending' ? 'orderReceived' : (status === 'accepted' ? 'preparing' : 'readyForPickup'))}
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', color: '#78716c' }}>
+                                                            {t(status === 'pending' ? 'orderReceivedDesc' : (status === 'accepted' ? 'preparingDesc' : 'readyForPickupDesc'))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {trackingOrder.status === 'cancelled' && (
+                                            <div style={{
+                                                padding: '16px',
+                                                background: '#fee2e2',
+                                                borderLeft: '4px solid #ef4444',
+                                                borderRadius: '8px',
+                                                marginBottom: '20px'
+                                            }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                                                    <span style={{ fontSize: '24px' }}>❌</span>
+                                                    <span style={{ fontSize: '16px', fontWeight: '600', color: '#292524' }}>
+                                                        {t('orderCancelled')}
+                                                    </span>
+                                                </div>
+                                                <div style={{ fontSize: '14px', color: '#78716c', marginLeft: '34px' }}>
+                                                    {t('orderCancelledDesc')}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {trackingOrder.status !== 'completed' && trackingOrder.status !== 'cancelled' && (
+                                            <div style={{
+                                                padding: '16px',
+                                                background: '#e0f2fe',
+                                                borderRadius: '8px',
+                                                marginBottom: '20px',
+                                                textAlign: 'center'
+                                            }}>
+                                                <div style={{ fontSize: '14px', color: '#0369a1', marginBottom: '4px' }}>
+                                                    ⏱️ {t('estimatedTime')}
+                                                </div>
+                                                <div style={{ fontSize: '28px', fontWeight: '700', color: '#0c4a6e' }}>
+                                                    {calculateEstimatedTime(trackingOrder)} {t('minutes')}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {trackingOrder.status === 'completed' && (
+                                            <div style={{
+                                                padding: '16px',
+                                                background: '#d1fae5',
+                                                borderRadius: '8px',
+                                                marginBottom: '20px',
+                                                textAlign: 'center'
+                                            }}>
+                                                <div style={{ fontSize: '20px', fontWeight: '700', color: '#059669' }}>
+                                                    ✅ {t('readyNow')}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <button
+                                            className="btn btn-secondary"
+                                            onClick={function() {
+                                                setTrackingOrder(null);
+                                                setTrackingInput({ orderId: '', phone: '' });
+                                            }}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {t('searchOrder')}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
