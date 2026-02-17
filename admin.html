@@ -933,17 +933,60 @@
             }
         };
 
-        // 登入組件
+        // 登入組件 - 使用 Supabase Auth
         function AdminLogin({ onLogin }) {
+            const [email, setEmail] = React.useState('');
             const [password, setPassword] = React.useState('');
             const [error, setError] = React.useState('');
+            const [loading, setLoading] = React.useState(false);
 
-            const handleLogin = (e) => {
+            const handleLogin = async (e) => {
                 e.preventDefault();
-                if (password === 'admin123') {
-                    onLogin();
-                } else {
-                    setError('密碼錯誤，請重試');
+                setError('');
+                setLoading(true);
+
+                try {
+                    // 等待 Supabase 初始化
+                    let attempts = 0;
+                    while (!window.supabaseReady && attempts < 50) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+
+                    if (!window.supabaseReady || !window.supabaseClient) {
+                        throw new Error('Supabase 未初始化，請刷新頁面重試');
+                    }
+
+                    console.log('🔐 Attempting login with email:', email);
+
+                    // 使用 Supabase Auth 登入
+                    const { data, error: authError } = await window.supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (authError) {
+                        console.error('❌ Login error:', authError);
+                        throw authError;
+                    }
+
+                    if (data && data.user) {
+                        console.log('✅ Login successful:', data.user.email);
+                        onLogin(data.session);
+                    } else {
+                        throw new Error('登入失敗：無法獲取用戶信息');
+                    }
+                } catch (err) {
+                    console.error('❌ Login failed:', err);
+                    if (err.message.includes('Invalid login credentials')) {
+                        setError('登入失敗：郵箱或密碼錯誤');
+                    } else if (err.message.includes('Email not confirmed')) {
+                        setError('請先確認您的郵箱地址');
+                    } else {
+                        setError(err.message || '登入失敗，請重試');
+                    }
+                } finally {
+                    setLoading(false);
                 }
             };
 
@@ -951,12 +994,25 @@
                 React.createElement('h2', { className: 'login-title' }, '🔐 管理後台登入'),
                 React.createElement('form', { onSubmit: handleLogin },
                     React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, '管理員郵箱'),
+                        React.createElement('input', {
+                            type: 'email',
+                            value: email,
+                            onChange: (e) => setEmail(e.target.value),
+                            placeholder: '請輸入管理員郵箱',
+                            required: true,
+                            disabled: loading
+                        })
+                    ),
+                    React.createElement('div', { className: 'form-group', style: { marginTop: '15px' } },
                         React.createElement('label', null, '密碼'),
                         React.createElement('input', {
                             type: 'password',
                             value: password,
                             onChange: (e) => setPassword(e.target.value),
-                            placeholder: '請輸入管理密碼'
+                            placeholder: '請輸入密碼',
+                            required: true,
+                            disabled: loading
                         })
                     ),
                     error && React.createElement('p', {
@@ -965,12 +1021,13 @@
                     React.createElement('button', {
                         type: 'submit',
                         className: 'btn btn-primary',
-                        style: { width: '100%' }
-                    }, '登入')
+                        style: { width: '100%' },
+                        disabled: loading
+                    }, loading ? '登入中...' : '登入')
                 ),
                 React.createElement('p', {
                     style: { marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px' }
-                }, '預設密碼: admin123')
+                }, '使用 Supabase Auth 管理員帳號登入')
             );
         }
 
@@ -1873,13 +1930,46 @@
         // 主應用程式
         function AdminApp() {
             const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [currentSession, setCurrentSession] = useState(null);
             const [currentView, setCurrentView] = useState('dashboard');
             const [orders, setOrders] = useState([]);
             const [menu, setMenu] = useState([]);
             const [optionsLibrary, setOptionsLibrary] = useState([]);
 
+            // 檢查登入狀態
+            useEffect(() => {
+                const checkSession = async () => {
+                    try {
+                        // 等待 Supabase 初始化
+                        let attempts = 0;
+                        while (!window.supabaseReady && attempts < 50) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            attempts++;
+                        }
+
+                        if (!window.supabaseReady || !window.supabaseClient) {
+                            return;
+                        }
+
+                        // 檢查是否有現有 session
+                        const { data: { session } } = await window.supabaseClient.auth.getSession();
+                        if (session) {
+                            console.log('✅ Found existing session:', session.user.email);
+                            setCurrentSession(session);
+                            setIsLoggedIn(true);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error checking session:', error);
+                    }
+                };
+
+                checkSession();
+            }, []);
+
             // 載入數據
             useEffect(() => {
+                if (!isLoggedIn) return;
+
                 const loadAllData = async () => {
                     try {
                         // 等待 Supabase 初始化
@@ -2011,13 +2101,24 @@
                 return () => {
                     clearInterval(interval);
                 };
-            }, []);
+            }, [isLoggedIn]);
 
-            const handleLogin = () => {
+            const handleLogin = (session) => {
+                console.log('✅ handleLogin called with session:', session?.user?.email);
+                setCurrentSession(session);
                 setIsLoggedIn(true);
             };
 
-            const handleLogout = () => {
+            const handleLogout = async () => {
+                try {
+                    if (window.supabaseClient) {
+                        await window.supabaseClient.auth.signOut();
+                        console.log('✅ Logged out successfully');
+                    }
+                } catch (error) {
+                    console.error('❌ Error logging out:', error);
+                }
+                setCurrentSession(null);
                 setIsLoggedIn(false);
                 setCurrentView('dashboard');
             };
