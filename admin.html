@@ -2071,6 +2071,9 @@
 
             // 定期從 Supabase 刷新數據
             useEffect(() => {
+                // Guard: 未登入不刷新
+                if (!isLoggedIn) return;
+
                 const refreshData = async () => {
                     if (!window.supabaseReady) return;
 
