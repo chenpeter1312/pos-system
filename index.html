@@ -391,14 +391,19 @@
             font-weight: bold;
         }
 
-        .status-pending {
+        .status-new {
             background: #fef3c7;
             color: #1f3a0f;
         }
 
-        .status-accepted {
+        .status-preparing {
             background: #dbeafe;
             color: #2563eb;
+        }
+
+        .status-ready {
+            background: #bfdbfe;
+            color: #1e3a8a;
         }
 
         .status-completed {
@@ -3535,22 +3540,27 @@
                 localStorage.setItem('preferredLanguage', newLang);
             };
 
-            // 订单状态配置
+            // 订单状态配置 - 统一数据模型
             const orderStatusConfig = {
-                pending: {
+                new: {
                     step: 1,
                     icon: '📝',
                     color: '#F59E0B'
                 },
-                accepted: {
+                preparing: {
                     step: 2,
                     icon: '👨‍🍳',
                     color: '#3B82F6'
                 },
-                completed: {
+                ready: {
                     step: 3,
                     icon: '✅',
                     color: '#10B981'
+                },
+                completed: {
+                    step: 4,
+                    icon: '✔️',
+                    color: '#059669'
                 },
                 cancelled: {
                     step: 0,
@@ -3570,9 +3580,9 @@
                 const itemAdjustment = Math.floor(itemCount / 3) * 2;
 
                 var statusAdjustment = 0;
-                if (order.status === 'accepted') {
+                if (order.status === 'preparing') {
                     statusAdjustment = -Math.floor((baseTime + itemAdjustment) / 2);
-                } else if (order.status === 'completed') {
+                } else if (order.status === 'ready' || order.status === 'completed') {
                     return 0;
                 }
 
@@ -3983,7 +3993,7 @@
                         tax: tax,
                         tip: tip,
                         total: total,
-                        status: 'pending',
+                        status: 'new',
                         paymentStatus: 'Paid',
                         paymentMethod: '信用卡',
                         cardholderName: cardholderName,
@@ -4002,8 +4012,14 @@
                                 phone: customerInfo.phone,
                                 service_mode: customerInfo.serviceMode || 'dine-in',
                                 items: orderItems,
+                                subtotal: subtotal,
+                                tax: tax,
+                                total_price: total,
                                 total: total,
-                                status: 'pending',
+                                status: 'new',
+                                order_source: 'qr',
+                                payment_method: 'stripe',
+                                payment_status: 'paid',
                                 notes: customerInfo.notes || null,
                                 scheduled_time: customerInfo.scheduledTime || null,
                                 created_at: new Date().toISOString()
@@ -5339,7 +5355,7 @@
                                             marginBottom: '30px',
                                             position: 'relative'
                                         }}>
-                                            {['pending', 'accepted', 'completed'].map(function(status, idx) {
+                                            {['new', 'preparing', 'ready'].map(function(status, idx) {
                                                 const config = orderStatusConfig[status];
                                                 const currentConfig = orderStatusConfig[trackingOrder.status];
                                                 const isActive = trackingOrder.status === status;
@@ -5378,10 +5394,10 @@
                                                             color: isActive && !isCancelled ? config.color : '#292524',
                                                             marginBottom: '4px'
                                                         }}>
-                                                            {t(status === 'pending' ? 'orderReceived' : (status === 'accepted' ? 'preparing' : 'readyForPickup'))}
+                                                            {t(status === 'new' ? 'orderReceived' : (status === 'preparing' ? 'preparing' : 'readyForPickup'))}
                                                         </div>
                                                         <div style={{ fontSize: '12px', color: '#78716c' }}>
-                                                            {t(status === 'pending' ? 'orderReceivedDesc' : (status === 'accepted' ? 'preparingDesc' : 'readyForPickupDesc'))}
+                                                            {t(status === 'new' ? 'orderReceivedDesc' : (status === 'preparing' ? 'preparingDesc' : 'readyForPickupDesc'))}
                                                         </div>
                                                     </div>
                                                 );

@@ -267,14 +267,19 @@
             font-weight: bold;
         }
 
-        .status-pending {
+        .status-new {
             background: #fef3c7;
             color: #92400e;
         }
 
-        .status-accepted {
+        .status-preparing {
             background: #dbeafe;
             color: #1e40af;
+        }
+
+        .status-ready {
+            background: #bfdbfe;
+            color: #1e3a8a;
         }
 
         .status-completed {
@@ -1395,22 +1400,34 @@
                     return false;
                 }
 
-                console.log(`💾 Updating order ${orderId} in Supabase...`);
+                console.log(`💾 Updating order ${orderId} in Supabase via RPC...`);
 
-                const { error } = await window.supabaseClient
-                    .from('orders')
-                    .update({
-                        status: updates.status,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', orderId);
+                // 安全：使用 RPC 更新（有審計日誌 + 防止修改 payment_status）
+                const { data, error } = await window.supabaseClient.rpc('admin_update_order_status', {
+                    p_order_id: orderId,
+                    p_new_status: updates.status,
+                    p_notes: updates.notes || '狀態更新'
+                });
 
                 if (error) {
-                    console.error('❌ Error updating order:', error);
+                    console.error('❌ RPC error:', error);
                     return false;
                 }
 
-                console.log('✅ Order updated in Supabase');
+                if (!data || data.length === 0) {
+                    console.error('❌ No result from RPC');
+                    return false;
+                }
+
+                const result = data[0];
+
+                if (!result.success) {
+                    console.error('❌ Update failed:', result.message);
+                    alert('更新失敗：' + result.message);
+                    return false;
+                }
+
+                console.log('✅ Order updated via RPC');
                 return true;
             } catch (error) {
                 console.error('❌ Error:', error);
@@ -1550,10 +1567,10 @@
                 itemCount: todayOrders.reduce((sum, order) =>
                     sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0
                 ),
-                pendingCount: todayOrders.filter(o => o.status === 'pending').length
+                pendingCount: todayOrders.filter(o => o.status === 'new').length
             };
 
-            const pendingOrders = orders.filter(o => o.status === 'pending');
+            const pendingOrders = orders.filter(o => o.status === 'new');
 
             return (
                 <div>
@@ -1616,16 +1633,22 @@
                             全部 ({orders.length})
                         </button>
                         <button
-                            className={`btn ${filter === 'pending' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setFilter('pending')}
+                            className={`btn ${filter === 'new' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('new')}
                         >
-                            待處理 ({orders.filter(o => o.status === 'pending').length})
+                            新訂單 ({orders.filter(o => o.status === 'new').length})
                         </button>
                         <button
-                            className={`btn ${filter === 'accepted' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setFilter('accepted')}
+                            className={`btn ${filter === 'preparing' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('preparing')}
                         >
-                            進行中 ({orders.filter(o => o.status === 'accepted').length})
+                            準備中 ({orders.filter(o => o.status === 'preparing').length})
+                        </button>
+                        <button
+                            className={`btn ${filter === 'ready' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setFilter('ready')}
+                        >
+                            可取餐 ({orders.filter(o => o.status === 'ready').length})
                         </button>
                         <button
                             className={`btn ${filter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
@@ -1665,8 +1688,9 @@
         // 訂單卡片組件
         function OrderCard({ order, onUpdateOrder }) {
             const statusMap = {
-                pending: { text: '待處理', class: 'status-pending' },
-                accepted: { text: '進行中', class: 'status-accepted' },
+                new: { text: '新訂單', class: 'status-new' },
+                preparing: { text: '準備中', class: 'status-preparing' },
+                ready: { text: '可取餐', class: 'status-ready' },
                 completed: { text: '已完成', class: 'status-completed' },
                 cancelled: { text: '已取消', class: 'status-cancelled' }
             };
@@ -1710,12 +1734,12 @@
                             <span style={{
                                 marginLeft: '8px',
                                 padding: '2px 8px',
-                                background: order.orderSource === 'staff_pos' ? '#dbeafe' : '#fef3c7',
-                                color: order.orderSource === 'staff_pos' ? '#1e40af' : '#92400e',
+                                background: order.orderSource === 'staff' ? '#dbeafe' : order.orderSource === 'admin' ? '#fce7f3' : '#fef3c7',
+                                color: order.orderSource === 'staff' ? '#1e40af' : order.orderSource === 'admin' ? '#9f1239' : '#92400e',
                                 borderRadius: '4px',
                                 fontSize: '13px'
                             }}>
-                                {order.orderSource === 'staff_pos' ? '👤 員工 POS' : '🌐 前台顧客'}
+                                {order.orderSource === 'staff' ? '👤 員工 POS' : order.orderSource === 'admin' ? '🔧 後台管理' : '🔗 掃碼點餐'}
                             </span>
                         </div>
                     )}
@@ -1725,7 +1749,8 @@
                             <strong>付款方式:</strong>
                             {order.paymentMethod === 'cash' ? ' 💵 現金' :
                              order.paymentMethod === 'card' ? ' 💳 刷卡' :
-                             order.paymentMethod === 'qr_code' ? ' 📱 掃碼' : ` ${order.paymentMethod}`}
+                             order.paymentMethod === 'stripe' ? ' 💳 Stripe' :
+                             order.paymentMethod === 'other' ? ' 📱 其他' : ` ${order.paymentMethod}`}
                             {order.paymentStatus && (
                                 <span style={{
                                     marginLeft: '8px',
@@ -1778,28 +1803,36 @@
 
                     {onUpdateOrder && order.status !== 'completed' && order.status !== 'cancelled' && (
                         <div className="admin-actions">
-                            {order.status === 'pending' && (
+                            {order.status === 'new' && (
                                 <>
                                     <button
                                         className="btn btn-success"
-                                        onClick={() => handleStatusChange('accepted')}
+                                        onClick={() => handleStatusChange('preparing')}
                                     >
-                                        接受訂單
+                                        開始準備
                                     </button>
                                     <button
                                         className="btn btn-danger"
                                         onClick={() => handleStatusChange('cancelled')}
                                     >
-                                        拒絕訂單
+                                        取消訂單
                                     </button>
                                 </>
                             )}
-                            {order.status === 'accepted' && (
+                            {order.status === 'preparing' && (
+                                <button
+                                    className="btn btn-success"
+                                    onClick={() => handleStatusChange('ready')}
+                                >
+                                    準備完成
+                                </button>
+                            )}
+                            {order.status === 'ready' && (
                                 <button
                                     className="btn btn-success"
                                     onClick={() => handleStatusChange('completed')}
                                 >
-                                    完成訂單
+                                    已取餐
                                 </button>
                             )}
                         </div>
@@ -4347,17 +4380,18 @@
                                 serviceMode: order.service_mode || order.order_type || 'dine-in',
                                 items: order.items,
                                 total: parseFloat(order.total || order.total_price || 0),
-                                status: order.status || 'pending',
+                                status: order.status || 'new',
                                 notes: order.notes,
                                 scheduledTime: order.scheduled_time,
                                 timestamp: order.created_at,
                                 createdAt: order.created_at,
                                 updatedAt: order.updated_at || order.created_at,
-                                // 新增員工POS字段
-                                orderSource: order.order_source || 'customer',
+                                // 統一數據模型字段
+                                orderSource: order.order_source || 'qr',
                                 paymentMethod: order.payment_method,
                                 paymentStatus: order.payment_status,
                                 staffName: order.staff_name,
+                                createdBy: order.created_by,
                                 subtotal: order.subtotal,
                                 tax: order.tax,
                                 hasCustomItems: order.has_custom_items
@@ -4433,7 +4467,7 @@
                                 serviceMode: order.service_mode || 'dine-in',
                                 items: order.items,
                                 total: parseFloat(order.total),
-                                status: order.status || 'pending',
+                                status: order.status || 'new',
                                 notes: order.notes,
                                 scheduledTime: order.scheduled_time,
                                 timestamp: order.created_at,
@@ -4488,9 +4522,9 @@
                 // 更新到 Supabase
                 await updateOrderInSupabase(orderId, updatedOrder);
 
-                // 🚀 如果订单状态变为 accepted，自动扣除包材库存
-                if (updatedOrder.status === 'accepted' && oldStatus !== 'accepted') {
-                    console.log('📦 订单已接受，开始扣除包材库存...', orderId);
+                // 🚀 如果订单状态变为 preparing，自动扣除包材库存
+                if (updatedOrder.status === 'preparing' && oldStatus !== 'preparing') {
+                    console.log('📦 订单开始准备，开始扣除包材库存...', orderId);
 
                     try {
                         if (!window.supabaseClient) {

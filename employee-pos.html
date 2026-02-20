@@ -646,6 +646,7 @@
         function App() {
             const [isLoggedIn, setIsLoggedIn] = useState(false);
             const [currentStaff, setCurrentStaff] = useState(null);
+            const [sessionToken, setSessionToken] = useState(null); // 安全：session token
             const [view, setView] = useState('menu'); // 'menu' or 'orders'
 
             // 菜單數據
@@ -673,7 +674,7 @@
                     const { data: menu, error: menuError } = await supabaseClient
                         .from('menu')
                         .select('*')
-                        .eq('is_available', true)
+                        .eq('available', true)
                         .order('name');
 
                     const { data: options, error: optionsError } = await supabaseClient
@@ -690,16 +691,29 @@
             };
 
             // 登入處理
-            const handleLogin = (staff) => {
-                setCurrentStaff(staff);
+            const handleLogin = (staffData, token) => {
+                setCurrentStaff(staffData);
+                setSessionToken(token);
                 setIsLoggedIn(true);
             };
 
             // 登出處理
-            const handleLogout = () => {
+            const handleLogout = async () => {
                 if (confirm('確定要登出嗎？')) {
+                    // 安全：呼叫 RPC 使 session 失效
+                    if (sessionToken) {
+                        try {
+                            await supabaseClient.rpc('staff_logout', {
+                                p_session_token: sessionToken
+                            });
+                        } catch (error) {
+                            console.error('登出 RPC 錯誤:', error);
+                        }
+                    }
+
                     setIsLoggedIn(false);
                     setCurrentStaff(null);
+                    setSessionToken(null);
                     setCart([]);
                 }
             };
@@ -768,10 +782,16 @@
                 setCustomItemForm({ name: '', amount: '' });
             };
 
-            // 結帳處理
+            // 結帳處理（安全：使用 RPC）
             const handleCheckout = async (paymentMethod) => {
                 if (cart.length === 0) {
                     alert('購物車是空的！');
+                    return;
+                }
+
+                if (!sessionToken) {
+                    alert('❌ Session 已過期，請重新登入');
+                    setIsLoggedIn(false);
                     return;
                 }
 
@@ -780,45 +800,64 @@
                 const tax = subtotal * 0.0825; // Texas 8.25% 稅率
                 const total = subtotal + tax;
 
-                // 準備訂單數據（兼容前台和員工POS）
-                const orderData = {
-                    // 基本訂單信息（兼容前台格式）
-                    customer_name: '現場顧客',
-                    phone: '',
-                    items: cart,
-                    total: total,  // 前台使用 total
-                    status: 'accepted', // 員工 POS 直接接受訂單
-                    created_at: new Date().toISOString(),
-
-                    // 新增員工 POS 專用字段
-                    order_type: orderType,
-                    order_source: 'staff_pos',
-                    payment_method: paymentMethod,
-                    payment_status: 'paid', // 員工 POS 結帳即付款
-                    staff_name: currentStaff.display_name,
-
-                    // 價格明細
-                    subtotal: subtotal,
-                    tax: tax,
-                    total_price: total,  // 同時保存到 total_price
-
-                    // 自定義項目標記
-                    has_custom_items: cart.some(item => item.isCustom)
-                };
+                // 準備商品列表（RPC 需要的格式）
+                const itemsForRPC = cart.map(item => ({
+                    item_id: item.menuItemId,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    options: item.options || [],
+                    is_custom: item.isCustom || false
+                }));
 
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('orders')
-                        .insert([orderData])
-                        .select();
+                    // 安全：透過 RPC 創建訂單（有 transaction 保護 + 審計日誌）
+                    const { data, error } = await supabaseClient.rpc('create_staff_order', {
+                        p_session_token: sessionToken,
+                        p_customer_name: '現場顧客',
+                        p_phone: '',
+                        p_order_type: orderType,
+                        p_items: itemsForRPC,
+                        p_subtotal: subtotal,
+                        p_tax: tax,
+                        p_tip: 0,
+                        p_total: total,
+                        p_payment_method: paymentMethod,
+                        p_notes: `POS 訂單，由 ${currentStaff.display_name || currentStaff.username} 建立`
+                    });
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('❌ 建單 RPC 錯誤:', error);
+                        throw error;
+                    }
 
-                    // 扣除庫存（如果有配置）
-                    await deductInventory(cart);
+                    if (!data || data.length === 0) {
+                        throw new Error('RPC 沒有返回結果');
+                    }
 
-                    const orderNumber = data[0].daily_order_number || data[0].id;
-                    alert(`✅ 訂單已完成！\n訂單編號：${orderNumber}\n總金額：$${total.toFixed(2)}\n付款方式：${paymentMethod === 'cash' ? '現金' : paymentMethod === 'card' ? '刷卡' : '掃碼'}`);
+                    const result = data[0];
+
+                    if (!result.success) {
+                        // Session 過期或其他錯誤
+                        if (result.message.includes('Session') || result.message.includes('過期')) {
+                            alert('❌ ' + result.message);
+                            setIsLoggedIn(false);
+                            setSessionToken(null);
+                            return;
+                        }
+                        throw new Error(result.message);
+                    }
+
+                    // 成功
+                    const orderNumber = result.order_id;
+                    const paymentMethodText = {
+                        'cash': '💵 現金',
+                        'card': '💳 刷卡',
+                        'stripe': '💳 Stripe',
+                        'other': '📱 其他'
+                    }[paymentMethod] || paymentMethod;
+
+                    alert(`✅ 訂單已完成！\n訂單編號：${orderNumber}\n總金額：$${total.toFixed(2)}\n付款方式：${paymentMethodText}`);
                     setCart([]);
 
                     // 刷新訂單列表（如果在訂單頁面）
@@ -936,8 +975,8 @@
                                 {menuItems.map(item => (
                                     <div
                                         key={item.id}
-                                        className={`menu-item-card ${!item.is_available ? 'unavailable' : ''}`}
-                                        onClick={() => item.is_available && addToCart(item)}
+                                        className={`menu-item-card ${!item.available ? 'unavailable' : ''}`}
+                                        onClick={() => item.available && addToCart(item)}
                                     >
                                         <div className="menu-item-image">
                                             {item.emoji || '🍽️'}
@@ -1045,10 +1084,10 @@
                                 </button>
                                 <button
                                     className="payment-btn qr"
-                                    onClick={() => handleCheckout('qr_code')}
+                                    onClick={() => handleCheckout('other')}
                                     disabled={cart.length === 0}
                                 >
-                                    📱 掃碼
+                                    📱 其他
                                 </button>
                             </div>
 
@@ -1138,23 +1177,55 @@
 
             const verifyPin = async (pinCode) => {
                 try {
-                    const { data, error } = await window.supabaseClient
-                        .from('staff_users')
-                        .select('*')
-                        .eq('pin_code', pinCode)
-                        .eq('is_active', true)
-                        .single();
+                    // 安全：使用 RPC 登入（有 rate limiting + 審計日誌）
+                    // 註：不直接查詢 staff_users 表，避免暴力破解
+                    const { data, error } = await window.supabaseClient.rpc('attempt_staff_login', {
+                        p_username: pinCode, // 簡化版：PIN 即 username（你也可改成要先輸入 username）
+                        p_pin_code: pinCode,
+                        p_ip_address: 'pos_device', // 實際可用 device ID 或 IP
+                        p_device_info: navigator.userAgent
+                    });
 
-                    if (error || !data) {
-                        setError('❌ PIN 碼錯誤');
+                    if (error) {
+                        console.error('❌ 登入 RPC 錯誤:', error);
+                        setError('❌ 登入失敗，請稍後再試');
                         setPin(['', '', '', '']);
                         inputRefs[0].current.focus();
-                    } else {
-                        onLogin(data);
+                        return;
                     }
+
+                    if (!data || data.length === 0) {
+                        setError('❌ 登入失敗');
+                        setPin(['', '', '', '']);
+                        inputRefs[0].current.focus();
+                        return;
+                    }
+
+                    const result = data[0];
+
+                    if (!result.success) {
+                        // 顯示具體錯誤訊息（包含剩餘次數或鎖定時間）
+                        setError(result.message);
+                        setPin(['', '', '', '']);
+                        inputRefs[0].current.focus();
+                        return;
+                    }
+
+                    // 登入成功，傳遞 staff 資訊和 session token
+                    const staffData = {
+                        id: result.staff_id,
+                        username: result.staff_name,
+                        display_name: result.staff_name,
+                        role: result.staff_role
+                    };
+
+                    onLogin(staffData, result.session_token);
+
                 } catch (err) {
+                    console.error('❌ 登入異常:', err);
                     setError('❌ 登入失敗');
-                    console.error(err);
+                    setPin(['', '', '', '']);
+                    inputRefs[0].current.focus();
                 }
             };
 
