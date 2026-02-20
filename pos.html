@@ -7,7 +7,13 @@
 
     <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script>
+        // Supabase Configuration
+        window.SUPABASE_CONFIG = {
+            url: 'https://tskelejztsdeewtpjcoq.supabase.co',
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRza2VsZWp6dHNkZWV3dHBqY29xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTUxNjUsImV4cCI6MjA4Njc3MTE2NX0.WFGyeBVRIXfrA9h2BVwQ9zpbmcHDXmI0xsFfdDVdGos'
+        };
+    </script>
 
     <!-- React & Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
