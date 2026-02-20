@@ -1,19 +1,26 @@
 {
-  "name": "simple-pos-system",
+  "name": "lees-pos-system",
+  "version": "2.0.0",
+  "description": "Lee's Taiwanese Comfort Food POS System - v2 Production Architecture",
   "private": true,
-  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "vercel --prod",
+    "install-deps": "npm install"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vercel": "^33.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
