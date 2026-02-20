@@ -1700,7 +1700,58 @@
 
                     {order.serviceMode && (
                         <div style={{ marginBottom: '10px', fontSize: '15px' }}>
-                            <strong>用餐方式:</strong> {order.serviceMode === 'dine-in' ? '內用' : '外帶'}
+                            <strong>用餐方式:</strong> {order.serviceMode === 'dine-in' || order.serviceMode === 'dine_in' ? '內用' : order.serviceMode === 'takeout' ? '外帶' : order.serviceMode === 'scheduled' ? '預約' : order.serviceMode}
+                        </div>
+                    )}
+
+                    {order.orderSource && (
+                        <div style={{ marginBottom: '10px', fontSize: '15px' }}>
+                            <strong>訂單來源:</strong>
+                            <span style={{
+                                marginLeft: '8px',
+                                padding: '2px 8px',
+                                background: order.orderSource === 'staff_pos' ? '#dbeafe' : '#fef3c7',
+                                color: order.orderSource === 'staff_pos' ? '#1e40af' : '#92400e',
+                                borderRadius: '4px',
+                                fontSize: '13px'
+                            }}>
+                                {order.orderSource === 'staff_pos' ? '👤 員工 POS' : '🌐 前台顧客'}
+                            </span>
+                        </div>
+                    )}
+
+                    {order.paymentMethod && (
+                        <div style={{ marginBottom: '10px', fontSize: '15px' }}>
+                            <strong>付款方式:</strong>
+                            {order.paymentMethod === 'cash' ? ' 💵 現金' :
+                             order.paymentMethod === 'card' ? ' 💳 刷卡' :
+                             order.paymentMethod === 'qr_code' ? ' 📱 掃碼' : ` ${order.paymentMethod}`}
+                            {order.paymentStatus && (
+                                <span style={{
+                                    marginLeft: '8px',
+                                    padding: '2px 8px',
+                                    background: order.paymentStatus === 'paid' ? '#d1fae5' : order.paymentStatus === 'unpaid' ? '#fee2e2' : '#f3f4f6',
+                                    color: order.paymentStatus === 'paid' ? '#065f46' : order.paymentStatus === 'unpaid' ? '#991b1b' : '#374151',
+                                    borderRadius: '4px',
+                                    fontSize: '13px'
+                                }}>
+                                    {order.paymentStatus === 'paid' ? '✅ 已付款' :
+                                     order.paymentStatus === 'unpaid' ? '⏳ 未付款' :
+                                     order.paymentStatus === 'refunded' ? '🔙 已退款' : order.paymentStatus}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {order.staffName && (
+                        <div style={{ marginBottom: '10px', fontSize: '15px' }}>
+                            <strong>操作員工:</strong> {order.staffName}
+                        </div>
+                    )}
+
+                    {order.hasCustomItems && (
+                        <div style={{ marginBottom: '10px', fontSize: '13px', color: '#6b7280' }}>
+                            ⚠️ 此訂單包含自定義項目
                         </div>
                     )}
 
@@ -4286,22 +4337,30 @@
                             loadFromSupabase('options_library')
                         ]);
 
-                        // 訂單數據轉換
+                        // 訂單數據轉換（兼容前台和員工POS）
                         if (ordersData) {
                             const normalizedOrders = ordersData.map(order => ({
                                 id: order.id,
-                                orderNumber: `#${order.id.toString().slice(-6)}`,
+                                orderNumber: order.daily_order_number ? `#${order.daily_order_number}` : `#${order.id.toString().slice(-6)}`,
                                 customerName: order.customer_name,
                                 phone: order.phone,
-                                serviceMode: order.service_mode || 'dine-in',
+                                serviceMode: order.service_mode || order.order_type || 'dine-in',
                                 items: order.items,
-                                total: parseFloat(order.total),
+                                total: parseFloat(order.total || order.total_price || 0),
                                 status: order.status || 'pending',
                                 notes: order.notes,
                                 scheduledTime: order.scheduled_time,
                                 timestamp: order.created_at,
                                 createdAt: order.created_at,
-                                updatedAt: order.updated_at || order.created_at
+                                updatedAt: order.updated_at || order.created_at,
+                                // 新增員工POS字段
+                                orderSource: order.order_source || 'customer',
+                                paymentMethod: order.payment_method,
+                                paymentStatus: order.payment_status,
+                                staffName: order.staff_name,
+                                subtotal: order.subtotal,
+                                tax: order.tax,
+                                hasCustomItems: order.has_custom_items
                             }));
                             setOrders(normalizedOrders);
                         } else {
