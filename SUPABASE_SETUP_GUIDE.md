@@ -53,7 +53,7 @@
 
 3. **验证表创建**
    - 左侧菜单 → Table Editor
-   - 应该看到 3 个表：
+   - 应该看到 3 个表：  
      - ✅ `menu` (菜单表)
      - ✅ `options_library` (选项库表)
      - ✅ `orders` (订单表)

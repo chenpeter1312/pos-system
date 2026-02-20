@@ -691,6 +691,506 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ========================================
+           🎨 Toast POS Style - Inventory Management
+           ======================================== */
+
+        /* 整体布局 */
+        .inventory-container {
+            background: #F8F9FA;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* 🎨 Toast POS Style - KPI 卡片（1大+2小堆叠） */
+        .kpi-cards-modern {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* 主要卡片（库存总价值） */
+        .kpi-card-modern.primary {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .kpi-card-modern.primary:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        /* 次要卡片（警告信息） */
+        .kpi-card-modern.secondary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .kpi-card-modern.secondary:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-value-large {
+            font-size: 48px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 12px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .kpi-label-small {
+            font-size: 15px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .kpi-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 56px;
+            height: 56px;
+            font-size: 28px;
+            font-weight: 700;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .kpi-badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .kpi-badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .kpi-secondary-content {
+            flex: 1;
+        }
+
+        .kpi-secondary-label {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-secondary-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        /* 🎨 Toast Style - 搜索和筛选区（优化版） */
+        .search-filter-bar {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-modern {
+            flex: 1;
+            min-width: 320px;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-box-modern input {
+            width: 100%;
+            padding: 14px 18px 14px 44px;
+            font-size: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .search-box-modern input:focus {
+            outline: none;
+            border-color: #6B4423;
+            box-shadow: 0 0 0 4px rgba(107, 68, 35, 0.08);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 10px 16px;
+            font-size: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-select:hover {
+            border-color: #6B4423;
+        }
+
+        .btn-primary-modern {
+            padding: 10px 20px;
+            background: #6B4423;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary-modern:hover {
+            background: #5a3a1f;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(107, 68, 35, 0.2);
+        }
+
+        /* 🎨 Toast Style - 表格（优化行距和交互） */
+        .table-modern {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .table-modern thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .table-modern th {
+            padding: 18px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .table-modern tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .table-modern tbody tr:hover {
+            background: #fafbfc;
+            box-shadow: inset 0 0 0 1px #e5e7eb;
+        }
+
+        .table-modern tbody tr:active {
+            background: #f3f4f6;
+        }
+
+        .table-modern td {
+            padding: 22px 20px;
+            font-size: 15px;
+            color: #111827;
+            min-height: 64px;
+            vertical-align: middle;
+        }
+
+        /* 库存数字样式 */
+        .inventory-qty {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .inventory-unit {
+            font-size: 13px;
+            color: #9ca3af;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        /* 状态 Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.low {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.out {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 🎨 Toast Style - 操作按钮（智能化） */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 基础进货按钮 */
+        .btn-action-primary {
+            padding: 10px 18px;
+            background: #6B4423;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(107, 68, 35, 0.2);
+        }
+
+        .btn-action-primary:hover {
+            background: #5a3a1f;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(107, 68, 35, 0.3);
+        }
+
+        /* 正常库存 - 淡色按钮 */
+        .btn-action-primary.normal {
+            background: #9ca3af;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action-primary.normal:hover {
+            background: #6b7280;
+        }
+
+        /* 低库存 - 警告色 */
+        .btn-action-primary.low {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-action-primary.low:hover {
+            background: #d97706;
+        }
+
+        /* 缺货 - 高亮色 */
+        .btn-action-primary.urgent {
+            background: #ef4444;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .btn-action-primary.urgent:hover {
+            background: #dc2626;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+            }
+        }
+
+        .btn-more {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .btn-more:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        /* 下拉菜单 */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 4px 0;
+        }
+
+        /* 展开详情区 */
+        .expanded-details {
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            padding: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .recent-transactions {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .kpi-cards-modern {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box-modern {
+                max-width: 100%;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table-modern {
+                font-size: 13px;
+            }
+
+            .table-modern td {
+                padding: 12px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1788,7 +2288,7 @@
                 setEditingOption(null);
                 setOptionName('');
                 setOptionType('radio');
-                setOptionValues([{ label: '', price: 0 }]);
+                setOptionValues([{ label: '', price: 0, enabled: true }]);
                 setShowModal(true);
             };
 
@@ -1796,7 +2296,10 @@
                 setEditingOption(option);
                 setOptionName(option.name);
                 setOptionType(option.type);
-                setOptionValues([...option.choices]);
+                setOptionValues(option.choices.map(c => ({
+                    ...c,
+                    enabled: c.enabled !== false
+                })));
                 setShowModal(true);
             };
 
@@ -1813,7 +2316,12 @@
                     id: editingOption ? editingOption.id : `opt-${Date.now()}`,
                     name: optionName,
                     type: optionType,
-                    choices: optionValues.map(v => ({ label: v.label.trim(), price: Number(v.price) || 0 }))
+                    is_enabled: editingOption ? editingOption.is_enabled : true,
+                    choices: optionValues.map(v => ({
+                        label: v.label.trim(),
+                        price: Number(v.price) || 0,
+                        enabled: v.enabled !== false
+                    }))
                 };
                 if (editingOption) {
                     onUpdateOptionsLibrary(optionsLibrary.map(opt => opt.id === editingOption.id ? newOption : opt));
@@ -1823,7 +2331,7 @@
                 setShowModal(false);
             };
 
-            const addValue = () => setOptionValues([...optionValues, { label: '', price: 0 }]);
+            const addValue = () => setOptionValues([...optionValues, { label: '', price: 0, enabled: true }]);
             const removeValue = (i) => optionValues.length > 1 && setOptionValues(optionValues.filter((_, idx) => idx !== i));
             const updateValue = (i, f, v) => { const u = [...optionValues]; u[i][f] = v; setOptionValues(u); };
 
@@ -1849,8 +2357,46 @@
                             React.createElement('div', { key: option.id, style: { background: '#fff', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '20px' } },
                                 React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '16px' } },
                                     React.createElement('div', null,
-                                        React.createElement('h3', { style: { color: '#6B4423', marginBottom: '8px' } }, option.name),
-                                        React.createElement('span', { style: { display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', background: option.type === 'radio' ? '#e3f2fd' : '#fff3e0', color: option.type === 'radio' ? '#1976d2' : '#f57c00' } }, option.type === 'radio' ? '單選' : '多選')
+                                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+                                            React.createElement('h3', { style: { color: '#6B4423', marginBottom: '0' } }, option.name),
+                                            React.createElement('label', {
+                                                style: {
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '13px',
+                                                    color: option.is_enabled !== false ? '#10b981' : '#ef4444',
+                                                    fontWeight: '600'
+                                                }
+                                            },
+                                                React.createElement('input', {
+                                                    type: 'checkbox',
+                                                    checked: option.is_enabled !== false,
+                                                    onChange: async (e) => {
+                                                        const newEnabled = e.target.checked;
+                                                        try {
+                                                            const { error } = await window.supabaseClient
+                                                                .from('options_library')
+                                                                .update({ is_enabled: newEnabled })
+                                                                .eq('id', option.id);
+
+                                                            if (!error) {
+                                                                onUpdateOptionsLibrary(optionsLibrary.map(opt =>
+                                                                    opt.id === option.id ? {...opt, is_enabled: newEnabled} : opt
+                                                                ));
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            alert('更新失敗');
+                                                        }
+                                                    },
+                                                    style: { width: '16px', height: '16px', cursor: 'pointer' }
+                                                }),
+                                                option.is_enabled !== false ? '✅ 啟用中' : '❌ 已停用'
+                                            )
+                                        ),
+                                        React.createElement('span', { style: { display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', background: option.type === 'radio' ? '#e3f2fd' : '#fff3e0', color: option.type === 'radio' ? '#1976d2' : '#f57c00', marginTop: '8px' } }, option.type === 'radio' ? '單選' : '多選')
                                     ),
                                     React.createElement('div', { style: { display: 'flex', gap: '8px' } },
                                         React.createElement('button', { onClick: () => handleEdit(option), style: { padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer' } }, '編輯'),
@@ -1859,8 +2405,53 @@
                                 ),
                                 React.createElement('div', { style: { display: 'grid', gap: '8px' } },
                                     option.choices.map((val, idx) =>
-                                        React.createElement('div', { key: idx, style: { display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#f9f9f9', borderRadius: '6px' } },
-                                            React.createElement('span', null, val.label),
+                                        React.createElement('div', {
+                                            key: idx,
+                                            style: {
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '10px 12px',
+                                                background: val.enabled !== false ? '#f9f9f9' : '#fee2e2',
+                                                borderRadius: '6px',
+                                                opacity: val.enabled !== false ? 1 : 0.6
+                                            }
+                                        },
+                                            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '12px', flex: 1 } },
+                                                React.createElement('input', {
+                                                    type: 'checkbox',
+                                                    checked: val.enabled !== false,
+                                                    onChange: async (e) => {
+                                                        const newEnabled = e.target.checked;
+                                                        const updatedChoices = option.choices.map((c, i) =>
+                                                            i === idx ? {...c, enabled: newEnabled} : c
+                                                        );
+
+                                                        try {
+                                                            const { error } = await window.supabaseClient
+                                                                .from('options_library')
+                                                                .update({ choices: updatedChoices })
+                                                                .eq('id', option.id);
+
+                                                            if (!error) {
+                                                                onUpdateOptionsLibrary(optionsLibrary.map(opt =>
+                                                                    opt.id === option.id ? {...opt, choices: updatedChoices} : opt
+                                                                ));
+                                                            }
+                                                        } catch (err) {
+                                                            console.error(err);
+                                                            alert('更新失敗');
+                                                        }
+                                                    },
+                                                    style: { width: '16px', height: '16px', cursor: 'pointer' }
+                                                }),
+                                                React.createElement('span', {
+                                                    style: {
+                                                        textDecoration: val.enabled !== false ? 'none' : 'line-through',
+                                                        color: val.enabled !== false ? '#000' : '#999'
+                                                    }
+                                                }, val.label)
+                                            ),
                                             React.createElement('span', { style: { fontWeight: 'bold', color: val.price > 0 ? '#6B4423' : '#999' } }, val.price > 0 ? `+$${val.price.toFixed(2)}` : '不加價')
                                         )
                                     )
@@ -2029,6 +2620,1599 @@
                             ))}
                         </tbody>
                     </table>
+                </div>
+            );
+        }
+
+        // 庫存管理組件
+        function InventoryManagement() {
+            const [inventoryItems, setInventoryItems] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [showQuickActionModal, setShowQuickActionModal] = useState(false);
+            const [selectedItem, setSelectedItem] = useState(null);
+            const [actionType, setActionType] = useState('');
+            const [actionQty, setActionQty] = useState('');
+
+            // 🆕 新功能状态
+            const [showReceiveModal, setShowReceiveModal] = useState(false);
+            const [showCountModal, setShowCountModal] = useState(false);
+            const [showAddItemModal, setShowAddItemModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showHistoryModal, setShowHistoryModal] = useState(false);
+
+            const [receiveForm, setReceiveForm] = useState({ qty: '', unit: 'pcs', cost: '', supplier: '' });
+            const [countForm, setCountForm] = useState({ actualQty: '', notes: '' });
+            const [newItemForm, setNewItemForm] = useState({
+                name: '', itemType: 'PACKAGING', baseUnit: 'pcs', unitsPerCase: '',
+                reorderPoint: '100', reorderQty: '200', leadTimeDays: '3', currentCost: '0.50'
+            });
+            const [editForm, setEditForm] = useState({});
+            const [transactions, setTransactions] = useState([]);
+
+            // 🆕🆕 菜品配置管理状态
+            const [currentView, setCurrentView] = useState('inventory'); // 'inventory' or 'menu_config'
+            const [menuItems, setMenuItems] = useState([]);
+            const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+            const [menuPackagingMaps, setMenuPackagingMaps] = useState([]);
+            const [showAddMappingModal, setShowAddMappingModal] = useState(false);
+            const [showEditMappingModal, setShowEditMappingModal] = useState(false);
+            const [addMappingForm, setAddMappingForm] = useState({ inventoryItemId: '', qtyPerSale: '1' });
+            const [selectedInventoryItems, setSelectedInventoryItems] = useState([]); // 批量选择的库存品项
+            const [editMappingForm, setEditMappingForm] = useState({});
+            const [menuSearchQuery, setMenuSearchQuery] = useState('');
+            const [selectedMappings, setSelectedMappings] = useState([]);
+
+            // 🆕🆕🆕 Toast POS Style UI 状态
+            const [searchQuery, setSearchQuery] = useState('');
+            const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'ok', 'low_stock', 'out_of_stock'
+            const [expandedRows, setExpandedRows] = useState([]); // 展开的行 ID
+            const [openMenuId, setOpenMenuId] = useState(null); // 打开的下拉菜单 ID
+            const [sortBy, setSortBy] = useState('urgent_first'); // 排序选项
+
+            // 載入庫存數據
+            const loadInventory = async () => {
+                setLoading(true);
+                try {
+                    if (!window.supabaseClient) {
+                        console.error('❌ Supabase client not initialized');
+                        return;
+                    }
+
+                    const { data, error } = await window.supabaseClient
+                        .from('inventory_overview')
+                        .select('*')
+                        .order('name', { ascending: true });
+
+                    if (error) {
+                        console.error('❌ Error loading inventory:', error);
+                        return;
+                    }
+
+                    setInventoryItems(data || []);
+                } catch (error) {
+                    console.error('❌ Error loading inventory:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            useEffect(() => {
+                loadInventory();
+                // 每 10 秒自動刷新
+                const interval = setInterval(loadInventory, 10000);
+                return () => clearInterval(interval);
+            }, []);
+
+            // 🆕🆕 加载菜单项
+            const loadMenuItems = async () => {
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from('menu')
+                        .select('*')
+                        .order('name', { ascending: true });
+
+                    if (error) {
+                        console.error('❌ Error loading menu items:', error);
+                        return;
+                    }
+
+                    setMenuItems(data || []);
+                } catch (error) {
+                    console.error('❌ Error loading menu items:', error);
+                }
+            };
+
+            // 🆕🆕 加载某个菜品的配置
+            const loadMenuPackagingMaps = async (menuItemName) => {
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .from('menu_packaging_map')
+                        .select(`
+                            *,
+                            inventory_items (
+                                id,
+                                name,
+                                item_type,
+                                base_unit,
+                                current_cost,
+                                qty_on_hand:inventory_overview(qty_on_hand)
+                            )
+                        `)
+                        .eq('menu_item_name', menuItemName);
+
+                    if (error) {
+                        console.error('❌ Error loading menu packaging maps:', error);
+                        return;
+                    }
+
+                    setMenuPackagingMaps(data || []);
+                } catch (error) {
+                    console.error('❌ Error loading menu packaging maps:', error);
+                }
+            };
+
+            // 🆕🆕 添加配置（支持批量）
+            const handleAddMapping = async () => {
+                if (!selectedMenuItem) {
+                    alert('請選擇菜品');
+                    return;
+                }
+
+                if (selectedInventoryItems.length === 0) {
+                    alert('請至少選擇一個庫存品項');
+                    return;
+                }
+
+                const qty = parseInt(addMappingForm.qtyPerSale);
+                if (!qty || qty <= 0) {
+                    alert('數量必須大於 0');
+                    return;
+                }
+
+                try {
+                    // 批量插入多个配置
+                    const mappings = selectedInventoryItems.map(itemId => ({
+                        menu_item_name: selectedMenuItem.name,
+                        inventory_item_id: itemId,
+                        qty_per_sale: qty,
+                        notes: addMappingForm.notes || ''
+                    }));
+
+                    const { error } = await window.supabaseClient
+                        .from('menu_packaging_map')
+                        .insert(mappings);
+
+                    if (error) {
+                        console.error('❌ Error adding mappings:', error);
+                        alert('添加失敗：' + error.message);
+                        return;
+                    }
+
+                    alert(`✅ 成功添加 ${selectedInventoryItems.length} 個配置！`);
+                    setShowAddMappingModal(false);
+                    setAddMappingForm({ inventoryItemId: '', qtyPerSale: '1', notes: '' });
+                    setSelectedInventoryItems([]);
+                    loadMenuPackagingMaps(selectedMenuItem.name);
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('添加失敗');
+                }
+            };
+
+            // 🆕🆕 更新配置
+            const handleUpdateMapping = async () => {
+                if (!editMappingForm.id || !editMappingForm.qty_per_sale) {
+                    alert('請填寫所有必填項');
+                    return;
+                }
+
+                const qty = parseInt(editMappingForm.qty_per_sale);
+                if (qty <= 0) {
+                    alert('數量必須大於 0');
+                    return;
+                }
+
+                try {
+                    const { error } = await window.supabaseClient
+                        .from('menu_packaging_map')
+                        .update({
+                            qty_per_sale: qty,
+                            notes: editMappingForm.notes || ''
+                        })
+                        .eq('id', editMappingForm.id);
+
+                    if (error) {
+                        console.error('❌ Error updating mapping:', error);
+                        alert('更新失敗：' + error.message);
+                        return;
+                    }
+
+                    alert('✅ 配置更新成功！');
+                    setShowEditMappingModal(false);
+                    setEditMappingForm({});
+                    loadMenuPackagingMaps(selectedMenuItem.name);
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('更新失敗');
+                }
+            };
+
+            // 🆕🆕 删除配置
+            const handleDeleteMapping = async (mappingId, itemName) => {
+                if (!confirm(`確定要刪除「${itemName}」的配置嗎？`)) {
+                    return;
+                }
+
+                try {
+                    const { error } = await window.supabaseClient
+                        .from('menu_packaging_map')
+                        .delete()
+                        .eq('id', mappingId);
+
+                    if (error) {
+                        console.error('❌ Error deleting mapping:', error);
+                        alert('刪除失敗：' + error.message);
+                        return;
+                    }
+
+                    alert('✅ 配置刪除成功！');
+                    loadMenuPackagingMaps(selectedMenuItem.name);
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('刪除失敗');
+                }
+            };
+
+            // 🆕🆕 批量删除配置
+            const handleBatchDelete = async () => {
+                if (selectedMappings.length === 0) {
+                    alert('請先選擇要刪除的配置');
+                    return;
+                }
+
+                if (!confirm(`確定要刪除 ${selectedMappings.length} 個配置嗎？`)) {
+                    return;
+                }
+
+                try {
+                    const { error } = await window.supabaseClient
+                        .from('menu_packaging_map')
+                        .delete()
+                        .in('id', selectedMappings);
+
+                    if (error) {
+                        console.error('❌ Error batch deleting:', error);
+                        alert('批量刪除失敗：' + error.message);
+                        return;
+                    }
+
+                    alert('✅ 批量刪除成功！');
+                    setSelectedMappings([]);
+                    loadMenuPackagingMaps(selectedMenuItem.name);
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('批量刪除失敗');
+                }
+            };
+
+            // 🆕🆕 加载菜单项（当切换到菜品配置视图时）
+            useEffect(() => {
+                if (currentView === 'menu_config' && menuItems.length === 0) {
+                    loadMenuItems();
+                }
+            }, [currentView]);
+
+            // 快捷操作函數
+            const handleQuickAction = async () => {
+                if (!selectedItem || !actionType || !actionQty || parseInt(actionQty) <= 0) {
+                    alert('請輸入有效的數量');
+                    return;
+                }
+
+                try {
+                    const { data, error } = await window.supabaseClient
+                        .rpc('quick_adjustment', {
+                            p_item_id: selectedItem.id,
+                            p_adjustment_type: actionType,
+                            p_qty: parseInt(actionQty)
+                        });
+
+                    if (error) {
+                        console.error('❌ Error executing quick action:', error);
+                        alert('操作失敗：' + error.message);
+                        return;
+                    }
+
+                    if (!data.success) {
+                        alert('操作失敗：' + data.message);
+                        return;
+                    }
+
+                    alert('✅ 操作成功！');
+                    setShowQuickActionModal(false);
+                    setSelectedItem(null);
+                    setActionType('');
+                    setActionQty('');
+                    loadInventory();
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('操作失敗');
+                }
+            };
+
+            // 打開快捷操作 Modal
+            const openQuickAction = (item, type) => {
+                setSelectedItem(item);
+                setActionType(type);
+                setActionQty('');
+                setShowQuickActionModal(true);
+            };
+
+            // 獲取狀態顏色
+            const getStatusColor = (status) => {
+                switch (status) {
+                    case 'ok': return '#10b981'; // 綠色
+                    case 'low_stock': return '#f59e0b'; // 橙色
+                    case 'out_of_stock': return '#ef4444'; // 紅色
+                    default: return '#6b7280'; // 灰色
+                }
+            };
+
+            // 獲取狀態文字
+            const getStatusText = (status) => {
+                switch (status) {
+                    case 'ok': return '✅ 充足';
+                    case 'low_stock': return '⚠️ 偏低';
+                    case 'out_of_stock': return '❌ 缺貨';
+                    default: return '❓ 未知';
+                }
+            };
+
+            // 獲取操作類型文字
+            const getActionTypeText = (type) => {
+                switch (type) {
+                    case 'staff_meal': return '🍴 員工餐';
+                    case 'waste': return '🗑️ 報廢';
+                    case 'gift': return '🎁 贈送';
+                    default: return type;
+                }
+            };
+
+            // 計算總庫存價值
+            const totalInventoryValue = inventoryItems.reduce((sum, item) => {
+                return sum + (parseFloat(item.current_cost || 0) * parseInt(item.qty_on_hand || 0));
+            }, 0);
+
+            if (loading) {
+                return (
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <div style={{ fontSize: '48px', marginBottom: '20px' }}>📦</div>
+                        <div>載入中...</div>
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    {/* 🆕🆕 视图切换按钮 */}
+                    <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', borderBottom: '2px solid #e5e7eb', paddingBottom: '10px' }}>
+                        <button
+                            onClick={() => setCurrentView('inventory')}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: currentView === 'inventory' ? '#6B4423' : 'transparent',
+                                color: currentView === 'inventory' ? 'white' : '#6B4423',
+                                border: currentView === 'inventory' ? 'none' : '2px solid #6B4423',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            📦 庫存總覽
+                        </button>
+                        <button
+                            onClick={() => setCurrentView('menu_config')}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: currentView === 'menu_config' ? '#6B4423' : 'transparent',
+                                color: currentView === 'menu_config' ? 'white' : '#6B4423',
+                                border: currentView === 'menu_config' ? 'none' : '2px solid #6B4423',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            🍽️ 菜品配置
+                        </button>
+                    </div>
+
+                    {/* 库存总览视图 */}
+                    {currentView === 'inventory' && (
+                        <div>
+                            {/* 🎨 Toast POS Style - KPI 卡片区（1大+2小） */}
+                            <div className="kpi-cards-modern">
+                                {/* 左侧大卡：库存总价值 */}
+                                <div className="kpi-card-modern primary">
+                                    <div className="kpi-value-large">${totalInventoryValue.toFixed(2)}</div>
+                                    <div className="kpi-label-small">庫存總價值</div>
+                                </div>
+
+                                {/* 右侧小卡堆叠 */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                    {/* 低库存预警 */}
+                                    <div className="kpi-card-modern secondary">
+                                        <div className="kpi-badge warning">
+                                            {inventoryItems.filter(item => item.stock_status === 'low_stock').length}
+                                        </div>
+                                        <div className="kpi-secondary-content">
+                                            <div className="kpi-secondary-label">低庫存預警</div>
+                                            <div className="kpi-secondary-value">⚠️ 需要關注</div>
+                                        </div>
+                                    </div>
+
+                                    {/* 缺货品项 */}
+                                    <div className="kpi-card-modern secondary">
+                                        <div className="kpi-badge danger">
+                                            {inventoryItems.filter(item => item.stock_status === 'out_of_stock').length}
+                                        </div>
+                                        <div className="kpi-secondary-content">
+                                            <div className="kpi-secondary-label">缺貨品項</div>
+                                            <div className="kpi-secondary-value">❌ 立即補貨</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 🎨 搜索和筛选栏 */}
+                            <div className="search-filter-bar">
+                                <div className="search-box-modern">
+                                    <span className="search-icon">🔍</span>
+                                    <input
+                                        type="text"
+                                        placeholder="👉 搜尋品項或分類"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="filter-group">
+                                    <select
+                                        className="filter-select"
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                    >
+                                        <option value="all">全部</option>
+                                        <option value="ok">✅ 正常</option>
+                                        <option value="low_stock">⚠️ 低庫存</option>
+                                        <option value="out_of_stock">❌ 缺貨</option>
+                                    </select>
+
+                                    <select
+                                        className="filter-select"
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                    >
+                                        <option value="urgent_first">🔥 缺貨優先</option>
+                                        <option value="low_stock_first">⚠️ 低庫存優先</option>
+                                        <option value="stock_most">📊 庫存最多</option>
+                                        <option value="stock_least">📉 庫存最少</option>
+                                        <option value="name_asc">🔤 名稱排序</option>
+                                    </select>
+
+                                    <button
+                                        className="btn-primary-modern"
+                                        onClick={() => setShowAddItemModal(true)}
+                                    >
+                                        <span>➕</span>
+                                        <span>添加品項</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 🎨 Summary 动态区 */}
+                            <div style={{
+                                background: 'white',
+                                padding: '16px 20px',
+                                borderRadius: '8px',
+                                marginBottom: '16px',
+                                display: 'flex',
+                                gap: '24px',
+                                fontSize: '13px',
+                                color: '#6b7280',
+                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)'
+                            }}>
+                                <div>
+                                    <span style={{ marginRight: '6px' }}>📦</span>
+                                    <strong style={{ color: '#374151' }}>總品項：</strong>
+                                    {inventoryItems.length} 項
+                                </div>
+                                <div>
+                                    <span style={{ marginRight: '6px' }}>✅</span>
+                                    <strong style={{ color: '#374151' }}>正常庫存：</strong>
+                                    {inventoryItems.filter(i => i.stock_status === 'ok').length} 項
+                                </div>
+                                <div>
+                                    <span style={{ marginRight: '6px' }}>⏰</span>
+                                    <strong style={{ color: '#374151' }}>最近更新：</strong>
+                                    剛剛
+                                </div>
+                            </div>
+
+                            {/* 🎨 简化表格 */}
+                            <table className="table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>品項名稱</th>
+                                        <th>現有庫存</th>
+                                        <th>狀態</th>
+                                        <th style={{ textAlign: 'right' }}>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {inventoryItems
+                                        .filter(item => {
+                                            // 搜索过滤
+                                            const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                                            // 状态过滤
+                                            const matchStatus = statusFilter === 'all' || item.stock_status === statusFilter;
+                                            return matchSearch && matchStatus;
+                                        })
+                                        .sort((a, b) => {
+                                            if (sortBy === 'urgent_first') {
+                                                // 缺货 > 低库存 > 正常
+                                                const order = { 'out_of_stock': 0, 'low_stock': 1, 'ok': 2 };
+                                                return order[a.stock_status] - order[b.stock_status];
+                                            } else if (sortBy === 'low_stock_first') {
+                                                const order = { 'low_stock': 0, 'out_of_stock': 1, 'ok': 2 };
+                                                return order[a.stock_status] - order[b.stock_status];
+                                            } else if (sortBy === 'stock_most') {
+                                                return (b.qty_on_hand || 0) - (a.qty_on_hand || 0);
+                                            } else if (sortBy === 'stock_least') {
+                                                return (a.qty_on_hand || 0) - (b.qty_on_hand || 0);
+                                            } else if (sortBy === 'name_asc') {
+                                                return a.name.localeCompare(b.name, 'zh-TW');
+                                            }
+                                            return 0;
+                                        })
+                                        .map(item => (
+                                            <React.Fragment key={item.id}>
+                                                <tr onClick={() => {
+                                                    if (expandedRows.includes(item.id)) {
+                                                        setExpandedRows(expandedRows.filter(id => id !== item.id));
+                                                    } else {
+                                                        setExpandedRows([...expandedRows, item.id]);
+                                                    }
+                                                }}>
+                                                    <td style={{ fontWeight: 'bold', color: '#111827' }}>
+                                                        <span style={{ marginRight: '8px', color: '#6b7280' }}>
+                                                            {expandedRows.includes(item.id) ? '▼' : '▶'}
+                                                        </span>
+                                                        {item.name}
+                                                    </td>
+                                                    <td>
+                                                        <span className="inventory-qty" style={{
+                                                            color: item.stock_status === 'ok' ? '#10b981' :
+                                                                   item.stock_status === 'low_stock' ? '#f59e0b' : '#ef4444'
+                                                        }}>
+                                                            {item.qty_on_hand}
+                                                        </span>
+                                                        <span className="inventory-unit">{item.unit}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span className={`status-badge ${item.stock_status === 'ok' ? 'ok' : item.stock_status === 'low_stock' ? 'low' : 'out'}`}>
+                                                            {item.stock_status === 'ok' ? '✅ 正常' :
+                                                             item.stock_status === 'low_stock' ? '⚠️ 偏低' : '❌ 缺貨'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="action-buttons" style={{ justifyContent: 'flex-end' }}>
+                                                            <button
+                                                                className={`btn-action-primary ${
+                                                                    item.stock_status === 'out_of_stock' ? 'urgent' :
+                                                                    item.stock_status === 'low_stock' ? 'low' : 'normal'
+                                                                }`}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedItem(item);
+                                                                    setReceiveForm({ qty: '', unit: item.unit || 'pcs', cost: item.current_cost?.toString() || '', supplier: '' });
+                                                                    setShowReceiveModal(true);
+                                                                }}
+                                                            >
+                                                                進貨
+                                                            </button>
+                                                            <div style={{ position: 'relative' }}>
+                                                                <button
+                                                                    className="btn-more"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setOpenMenuId(openMenuId === item.id ? null : item.id);
+                                                                    }}
+                                                                >
+                                                                    ⋯
+                                                                </button>
+                                                                {openMenuId === item.id && (
+                                                                    <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                setSelectedItem(item);
+                                                                                setCountForm({ actualQty: item.qty_on_hand?.toString() || '0', notes: '' });
+                                                                                setShowCountModal(true);
+                                                                                setOpenMenuId(null);
+                                                                            }}
+                                                                        >
+                                                                            📝 盤點
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                setSelectedItem(item);
+                                                                                setEditForm({
+                                                                                    reorderPoint: item.reorder_point?.toString() || '100',
+                                                                                    reorderQty: item.reorder_qty?.toString() || '200',
+                                                                                    leadTimeDays: item.lead_time_days?.toString() || '3',
+                                                                                    currentCost: item.current_cost?.toString() || '0.50',
+                                                                                    unitsPerCase: item.units_per_case?.toString() || ''
+                                                                                });
+                                                                                setShowEditModal(true);
+                                                                                setOpenMenuId(null);
+                                                                            }}
+                                                                        >
+                                                                            ✏️ 編輯
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={async () => {
+                                                                                setSelectedItem(item);
+                                                                                setShowHistoryModal(true);
+                                                                                setOpenMenuId(null);
+                                                                                try {
+                                                                                    const { data, error } = await window.supabaseClient
+                                                                                        .from('inventory_transactions')
+                                                                                        .select('*')
+                                                                                        .eq('item_id', item.id)
+                                                                                        .order('created_at', { ascending: false })
+                                                                                        .limit(50);
+                                                                                    if (!error) setTransactions(data || []);
+                                                                                } catch (e) { console.error(e); }
+                                                                            }}
+                                                                        >
+                                                                            📊 歷史
+                                                                        </button>
+                                                                        <div className="dropdown-divider"></div>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                openQuickAction(item, 'staff_meal');
+                                                                                setOpenMenuId(null);
+                                                                            }}
+                                                                        >
+                                                                            🍴 員工餐
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                openQuickAction(item, 'waste');
+                                                                                setOpenMenuId(null);
+                                                                            }}
+                                                                        >
+                                                                            🗑️ 報廢
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item"
+                                                                            onClick={() => {
+                                                                                openQuickAction(item, 'gift');
+                                                                                setOpenMenuId(null);
+                                                                            }}
+                                                                        >
+                                                                            🎁 贈送
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                {/* 展开详情 */}
+                                                {expandedRows.includes(item.id) && (
+                                                    <tr>
+                                                        <td colSpan="4" style={{ padding: 0, border: 'none' }}>
+                                                            <div className="expanded-details">
+                                                                <div className="detail-grid">
+                                                                    <div className="detail-item">
+                                                                        <div className="detail-label">安全庫存</div>
+                                                                        <div className="detail-value">{item.reorder_point} {item.unit}</div>
+                                                                    </div>
+                                                                    <div className="detail-item">
+                                                                        <div className="detail-label">單位成本</div>
+                                                                        <div className="detail-value">${parseFloat(item.current_cost || 0).toFixed(2)}</div>
+                                                                    </div>
+                                                                    <div className="detail-item">
+                                                                        <div className="detail-label">庫存價值</div>
+                                                                        <div className="detail-value" style={{ color: '#6B4423' }}>
+                                                                            ${(parseFloat(item.current_cost || 0) * parseInt(item.qty_on_hand || 0)).toFixed(2)}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="detail-item">
+                                                                        <div className="detail-label">周轉天數</div>
+                                                                        <div className="detail-value">
+                                                                            {item.days_of_cover !== null ? (
+                                                                                <span style={{
+                                                                                    color: parseFloat(item.days_of_cover) < 3 ? '#ef4444' :
+                                                                                           parseFloat(item.days_of_cover) < 7 ? '#f59e0b' : '#10b981'
+                                                                                }}>
+                                                                                    {parseFloat(item.days_of_cover).toFixed(1)} 天
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span style={{ color: '#9ca3af' }}>N/A</span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* 最近操作记录预留区 */}
+                                                                <div className="recent-transactions" style={{ display: 'none' }}>
+                                                                    <div style={{ fontWeight: '600', fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>
+                                                                        📝 最近操作記錄
+                                                                    </div>
+                                                                    {/* 可以在这里添加最近的交易记录 */}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                </tbody>
+                            </table>
+
+                            {inventoryItems
+                                .filter(item => {
+                                    const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+                                    const matchStatus = statusFilter === 'all' || item.stock_status === statusFilter;
+                                    return matchSearch && matchStatus;
+                                }).length === 0 && (
+                                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9ca3af', background: 'white', borderRadius: '8px', marginTop: '20px' }}>
+                                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📭</div>
+                                    <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>找不到符合條件的品項</div>
+                                    <div style={{ fontSize: '14px' }}>請嘗試調整搜尋條件或篩選器</div>
+                                </div>
+                            )}
+
+                    {/* 快捷操作 Modal */}
+                    {showQuickActionModal && selectedItem && (
+                        <div className="modal" onClick={() => setShowQuickActionModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowQuickActionModal(false)}>&times;</span>
+                                <h2>{getActionTypeText(actionType)} - {selectedItem.name}</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <strong>現有庫存：</strong>
+                                        <span style={{
+                                            fontSize: '20px',
+                                            marginLeft: '10px',
+                                            color: getStatusColor(selectedItem.stock_status)
+                                        }}>
+                                            {selectedItem.qty_on_hand}
+                                        </span>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                            數量
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={actionQty}
+                                            onChange={(e) => setActionQty(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px',
+                                                fontSize: '16px',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px'
+                                            }}
+                                            placeholder="請輸入數量"
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button
+                                            onClick={handleQuickAction}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#6B4423',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            確認
+                                        </button>
+                                        <button
+                                            onClick={() => setShowQuickActionModal(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#6b7280',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px'
+                                            }}
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕 进货Modal */}
+                    {showReceiveModal && selectedItem && (
+                        <div className="modal" onClick={() => setShowReceiveModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowReceiveModal(false)}>&times;</span>
+                                <h2>📦 進貨 - {selectedItem.name}</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>數量</label>
+                                        <input type="number" value={receiveForm.qty} onChange={(e) => setReceiveForm({...receiveForm, qty: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>單位</label>
+                                        <select value={receiveForm.unit} onChange={(e) => setReceiveForm({...receiveForm, unit: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}>
+                                            <option value="pcs">pcs (個)</option>
+                                            <option value="box">box (箱)</option>
+                                            <option value="bag">bag (包)</option>
+                                            <option value="pack">pack (組)</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>單位成本</label>
+                                        <input type="number" step="0.01" value={receiveForm.cost} onChange={(e) => setReceiveForm({...receiveForm, cost: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>供應商（選填）</label>
+                                        <input type="text" value={receiveForm.supplier} onChange={(e) => setReceiveForm({...receiveForm, supplier: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button onClick={async () => {
+                                            if (!receiveForm.qty || !receiveForm.cost) { alert('請填寫數量和成本'); return; }
+                                            try {
+                                                const { data, error } = await window.supabaseClient.rpc('receive_inventory_with_conversion', {
+                                                    p_item_id: selectedItem.id, p_qty: parseInt(receiveForm.qty), p_unit: receiveForm.unit,
+                                                    p_cost_per_unit: parseFloat(receiveForm.cost), p_supplier: receiveForm.supplier || null,
+                                                    p_batch_number: null, p_expiry_date: null
+                                                });
+                                                if (error) { alert('進貨失敗：' + error.message); return; }
+                                                if (!data.success) { alert('進貨失敗：' + data.message); return; }
+                                                alert('✅ 進貨成功！\n' + data.message);
+                                                setShowReceiveModal(false);
+                                                loadInventory();
+                                            } catch (e) { alert('進貨失敗'); }
+                                        }} style={{ flex: 1, padding: '12px', backgroundColor: '#6B4423', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>確認</button>
+                                        <button onClick={() => setShowReceiveModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕 盘点Modal */}
+                    {showCountModal && selectedItem && (
+                        <div className="modal" onClick={() => setShowCountModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowCountModal(false)}>&times;</span>
+                                <h2>📝 盤點調整 - {selectedItem.name}</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <strong>系統庫存：</strong><span style={{ fontSize: '20px', marginLeft: '10px' }}>{selectedItem.qty_on_hand}</span>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>實際庫存</label>
+                                        <input type="number" value={countForm.actualQty} onChange={(e) => setCountForm({...countForm, actualQty: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>備註（選填）</label>
+                                        <textarea value={countForm.notes} onChange={(e) => setCountForm({...countForm, notes: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px', minHeight: '60px' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button onClick={async () => {
+                                            if (!countForm.actualQty) { alert('請輸入實際數量'); return; }
+                                            try {
+                                                const { data, error } = await window.supabaseClient.rpc('inventory_count_adjustment', {
+                                                    p_item_id: selectedItem.id, p_actual_qty: parseInt(countForm.actualQty),
+                                                    p_adjusted_by: 'admin', p_notes: countForm.notes || null
+                                                });
+                                                if (error) { alert('盤點調整失敗：' + error.message); return; }
+                                                const delta = data.delta;
+                                                const message = delta === 0 ? '✅ 盤點完成！庫存數量一致，無需調整。' :
+                                                    `✅ 盤點完成！\n系統庫存：${data.system_qty}\n實際庫存：${data.actual_qty}\n差異：${delta > 0 ? '+' : ''}${delta}`;
+                                                alert(message);
+                                                setShowCountModal(false);
+                                                loadInventory();
+                                            } catch (e) { alert('盤點調整失敗'); }
+                                        }} style={{ flex: 1, padding: '12px', backgroundColor: '#6B4423', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>確認</button>
+                                        <button onClick={() => setShowCountModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕 添加新品项Modal */}
+                    {showAddItemModal && (
+                        <div className="modal" onClick={() => setShowAddItemModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowAddItemModal(false)}>&times;</span>
+                                <h2>➕ 添加新品項</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>品項名稱 *</label>
+                                        <input type="text" value={newItemForm.name} onChange={(e) => setNewItemForm({...newItemForm, name: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>類型</label>
+                                        <select value={newItemForm.itemType} onChange={(e) => setNewItemForm({...newItemForm, itemType: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}>
+                                            <option value="PACKAGING">包材</option>
+                                            <option value="BEVERAGE_PACKAGED">瓶裝飲料</option>
+                                            <option value="PREPACKAGED_FOOD">預包裝食品</option>
+                                            <option value="SUPPLY">耗材</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>主單位</label>
+                                        <select value={newItemForm.baseUnit} onChange={(e) => setNewItemForm({...newItemForm, baseUnit: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}>
+                                            <option value="pcs">pcs (個)</option>
+                                            <option value="box">box (盒)</option>
+                                            <option value="bag">bag (包)</option>
+                                            <option value="bottle">bottle (瓶)</option>
+                                            <option value="can">can (罐)</option>
+                                            <option value="roll">roll (卷)</option>
+                                            <option value="pack">pack (組)</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>補貨點</label>
+                                            <input type="number" value={newItemForm.reorderPoint} onChange={(e) => setNewItemForm({...newItemForm, reorderPoint: e.target.value})}
+                                                style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>建議補貨量</label>
+                                            <input type="number" value={newItemForm.reorderQty} onChange={(e) => setNewItemForm({...newItemForm, reorderQty: e.target.value})}
+                                                style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                        </div>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>單位成本</label>
+                                        <input type="number" step="0.01" value={newItemForm.currentCost} onChange={(e) => setNewItemForm({...newItemForm, currentCost: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button onClick={async () => {
+                                            if (!newItemForm.name) { alert('請輸入品項名稱'); return; }
+                                            try {
+                                                const { error } = await window.supabaseClient.from('inventory_items').insert([{
+                                                    name: newItemForm.name, item_type: newItemForm.itemType, is_countable: true,
+                                                    base_unit: newItemForm.baseUnit, units_per_case: newItemForm.unitsPerCase ? parseInt(newItemForm.unitsPerCase) : null,
+                                                    reorder_point: parseInt(newItemForm.reorderPoint), reorder_qty: parseInt(newItemForm.reorderQty),
+                                                    lead_time_days: parseInt(newItemForm.leadTimeDays), current_cost: parseFloat(newItemForm.currentCost)
+                                                }]);
+                                                if (error) { alert('新增品項失敗：' + error.message); return; }
+                                                alert('✅ 新增品項成功！');
+                                                setShowAddItemModal(false);
+                                                setNewItemForm({ name: '', itemType: 'PACKAGING', baseUnit: 'pcs', unitsPerCase: '', reorderPoint: '100', reorderQty: '200', leadTimeDays: '3', currentCost: '0.50' });
+                                                loadInventory();
+                                            } catch (e) { alert('新增品項失敗'); }
+                                        }} style={{ flex: 1, padding: '12px', backgroundColor: '#6B4423', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>確認</button>
+                                        <button onClick={() => setShowAddItemModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕 编辑品项Modal */}
+                    {showEditModal && selectedItem && (
+                        <div className="modal" onClick={() => setShowEditModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowEditModal(false)}>&times;</span>
+                                <h2>✏️ 編輯品項 - {selectedItem.name}</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>補貨點</label>
+                                            <input type="number" value={editForm.reorderPoint} onChange={(e) => setEditForm({...editForm, reorderPoint: e.target.value})}
+                                                style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>建議補貨量</label>
+                                            <input type="number" value={editForm.reorderQty} onChange={(e) => setEditForm({...editForm, reorderQty: e.target.value})}
+                                                style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                        </div>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>單位成本</label>
+                                        <input type="number" step="0.01" value={editForm.currentCost} onChange={(e) => setEditForm({...editForm, currentCost: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>到貨天數</label>
+                                        <input type="number" value={editForm.leadTimeDays} onChange={(e) => setEditForm({...editForm, leadTimeDays: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button onClick={async () => {
+                                            try {
+                                                const { error } = await window.supabaseClient.from('inventory_items').update({
+                                                    reorder_point: parseInt(editForm.reorderPoint), reorder_qty: parseInt(editForm.reorderQty),
+                                                    lead_time_days: parseInt(editForm.leadTimeDays), current_cost: parseFloat(editForm.currentCost),
+                                                    units_per_case: editForm.unitsPerCase ? parseInt(editForm.unitsPerCase) : null
+                                                }).eq('id', selectedItem.id);
+                                                if (error) { alert('更新品項失敗：' + error.message); return; }
+                                                alert('✅ 更新成功！');
+                                                setShowEditModal(false);
+                                                loadInventory();
+                                            } catch (e) { alert('更新品項失敗'); }
+                                        }} style={{ flex: 1, padding: '12px', backgroundColor: '#6B4423', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}>確認</button>
+                                        <button onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>取消</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕 交易历史Modal */}
+                    {showHistoryModal && selectedItem && (
+                        <div className="modal" onClick={() => setShowHistoryModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px' }}>
+                                <span className="close" onClick={() => setShowHistoryModal(false)}>&times;</span>
+                                <h2>📊 交易歷史 - {selectedItem.name}</h2>
+                                <div style={{ marginTop: '20px', maxHeight: '500px', overflowY: 'auto' }}>
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th>時間</th>
+                                                <th>類型</th>
+                                                <th>數量</th>
+                                                <th>單位成本</th>
+                                                <th>關聯</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {transactions.map((t, i) => (
+                                                <tr key={i}>
+                                                    <td>{new Date(t.created_at).toLocaleString('zh-TW')}</td>
+                                                    <td>{t.transaction_type === 'in' ? '📦 入庫' : '📤 出庫'}</td>
+                                                    <td style={{ color: t.transaction_type === 'in' ? '#10b981' : '#ef4444' }}>
+                                                        {t.transaction_type === 'in' ? '+' : '-'}{t.qty}
+                                                    </td>
+                                                    <td>${parseFloat(t.cost_per_unit || 0).toFixed(2)}</td>
+                                                    <td>{t.reference_type}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    {transactions.length === 0 && (
+                                        <div style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
+                                            <div>暫無交易記錄</div>
+                                        </div>
+                                    )}
+                                </div>
+                                <button onClick={() => setShowHistoryModal(false)} style={{ width: '100%', padding: '12px', marginTop: '20px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px' }}>關閉</button>
+                            </div>
+                        </div>
+                    )}
+                        </div>
+                    )}
+
+                    {/* 🆕🆕 菜品配置视图 */}
+                    {currentView === 'menu_config' && (
+                        <div style={{ display: 'flex', gap: '20px', height: '70vh' }}>
+                            {/* 左侧：菜品列表 */}
+                            <div style={{ width: '35%', borderRight: '2px solid #e5e7eb', paddingRight: '20px', overflowY: 'auto' }}>
+                                <div style={{ marginBottom: '15px', position: 'sticky', top: 0, backgroundColor: 'white', paddingBottom: '10px', zIndex: 10 }}>
+                                    <h3 style={{ color: '#6B4423', marginBottom: '10px' }}>🍽️ 菜品列表</h3>
+                                    <input
+                                        type="text"
+                                        placeholder="搜索菜品..."
+                                        value={menuSearchQuery}
+                                        onChange={(e) => setMenuSearchQuery(e.target.value)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px',
+                                            fontSize: '14px',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '4px'
+                                        }}
+                                    />
+                                </div>
+
+                                {menuItems
+                                    .filter(item => item.name.toLowerCase().includes(menuSearchQuery.toLowerCase()) ||
+                                                   (item.english_name && item.english_name.toLowerCase().includes(menuSearchQuery.toLowerCase())))
+                                    .map(menuItem => (
+                                        <div
+                                            key={menuItem.id}
+                                            onClick={() => {
+                                                setSelectedMenuItem(menuItem);
+                                                loadMenuPackagingMaps(menuItem.name);
+                                            }}
+                                            style={{
+                                                padding: '15px',
+                                                marginBottom: '10px',
+                                                border: selectedMenuItem?.id === menuItem.id ? '2px solid #6B4423' : '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                backgroundColor: selectedMenuItem?.id === menuItem.id ? '#fef3c7' : 'white',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#6B4423' }}>{menuItem.name}</div>
+                                            {menuItem.english_name && (
+                                                <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '3px' }}>{menuItem.english_name}</div>
+                                            )}
+                                            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '5px' }}>
+                                                ${parseFloat(menuItem.price).toFixed(2)}
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+
+                            {/* 右侧：配置详情 */}
+                            <div style={{ flex: 1, overflowY: 'auto' }}>
+                                {!selectedMenuItem ? (
+                                    <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9ca3af' }}>
+                                        <div style={{ fontSize: '48px', marginBottom: '20px' }}>🍽️</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 'bold' }}>請從左側選擇一個菜品</div>
+                                        <div style={{ fontSize: '14px', marginTop: '10px' }}>選擇後可配置該菜品的庫存扣減項目</div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {/* 配置详情头部 */}
+                                        <div style={{ marginBottom: '20px', padding: '20px', backgroundColor: '#fef3c7', borderRadius: '8px', border: '2px solid #6B4423' }}>
+                                            <h3 style={{ color: '#6B4423', marginBottom: '10px' }}>📋 {selectedMenuItem.name}</h3>
+                                            {selectedMenuItem.english_name && (
+                                                <div style={{ fontSize: '14px', color: '#92400e', marginBottom: '5px' }}>{selectedMenuItem.english_name}</div>
+                                            )}
+                                            <div style={{ fontSize: '16px', color: '#6b7280' }}>
+                                                售價: ${parseFloat(selectedMenuItem.price).toFixed(2)}
+                                            </div>
+                                        </div>
+
+                                        {/* 操作按钮 */}
+                                        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+                                            <button
+                                                onClick={() => {
+                                                    setAddMappingForm({ inventoryItemId: '', qtyPerSale: '1', notes: '' });
+                                                    setSelectedInventoryItems([]);
+                                                    setShowAddMappingModal(true);
+                                                }}
+                                                style={{
+                                                    padding: '10px 20px',
+                                                    backgroundColor: '#10b981',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                                                ➕ 添加配置
+                                            </button>
+                                            {selectedMappings.length > 0 && (
+                                                <button
+                                                    onClick={handleBatchDelete}
+                                                    style={{
+                                                        padding: '10px 20px',
+                                                        backgroundColor: '#ef4444',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer',
+                                                        fontSize: '14px'
+                                                    }}
+                                                >
+                                                    🗑️ 批量删除 ({selectedMappings.length})
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => loadMenuPackagingMaps(selectedMenuItem.name)}
+                                                style={{
+                                                    padding: '10px 20px',
+                                                    backgroundColor: '#6b7280',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px'
+                                                }}
+                                            >
+                                                🔄 刷新
+                                            </button>
+                                        </div>
+
+                                        {/* 配置列表 */}
+                                        <h4 style={{ color: '#6B4423', marginBottom: '15px' }}>當前配置的庫存扣減項 ({menuPackagingMaps.length})</h4>
+
+                                        {menuPackagingMaps.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '40px', border: '2px dashed #e5e7eb', borderRadius: '8px', color: '#9ca3af' }}>
+                                                <div style={{ fontSize: '36px', marginBottom: '10px' }}>📦</div>
+                                                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>暫無配置</div>
+                                                <div style={{ fontSize: '14px', marginTop: '5px' }}>點擊「添加配置」按鈕開始配置</div>
+                                            </div>
+                                        ) : (
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style={{ width: '50px' }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedMappings.length === menuPackagingMaps.length && menuPackagingMaps.length > 0}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedMappings(menuPackagingMaps.map(m => m.id));
+                                                                    } else {
+                                                                        setSelectedMappings([]);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </th>
+                                                        <th>庫存品項</th>
+                                                        <th>類型</th>
+                                                        <th>每份用量</th>
+                                                        <th>單位</th>
+                                                        <th>當前庫存</th>
+                                                        <th>單位成本</th>
+                                                        <th>備註</th>
+                                                        <th>操作</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {menuPackagingMaps.map(mapping => {
+                                                        const invItem = mapping.inventory_items;
+                                                        const qtyOnHand = invItem.qty_on_hand && invItem.qty_on_hand.length > 0 ? invItem.qty_on_hand[0].qty_on_hand : 0;
+
+                                                        return (
+                                                            <tr key={mapping.id}>
+                                                                <td>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedMappings.includes(mapping.id)}
+                                                                        onChange={(e) => {
+                                                                            if (e.target.checked) {
+                                                                                setSelectedMappings([...selectedMappings, mapping.id]);
+                                                                            } else {
+                                                                                setSelectedMappings(selectedMappings.filter(id => id !== mapping.id));
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </td>
+                                                                <td style={{ fontWeight: 'bold' }}>{invItem.name}</td>
+                                                                <td>
+                                                                    <span style={{
+                                                                        padding: '3px 8px',
+                                                                        borderRadius: '4px',
+                                                                        fontSize: '11px',
+                                                                        backgroundColor: '#e0e7ff',
+                                                                        color: '#3730a3'
+                                                                    }}>
+                                                                        {invItem.item_type}
+                                                                    </span>
+                                                                </td>
+                                                                <td style={{ fontSize: '18px', fontWeight: 'bold', color: '#6B4423' }}>
+                                                                    {mapping.qty_per_sale}
+                                                                </td>
+                                                                <td>{invItem.base_unit}</td>
+                                                                <td style={{
+                                                                    color: qtyOnHand < 50 ? '#ef4444' : qtyOnHand < 100 ? '#f59e0b' : '#10b981',
+                                                                    fontWeight: 'bold'
+                                                                }}>
+                                                                    {qtyOnHand}
+                                                                </td>
+                                                                <td>${parseFloat(invItem.current_cost || 0).toFixed(2)}</td>
+                                                                <td style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                                    {mapping.notes || '-'}
+                                                                </td>
+                                                                <td>
+                                                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setEditMappingForm({
+                                                                                    id: mapping.id,
+                                                                                    qty_per_sale: mapping.qty_per_sale.toString(),
+                                                                                    notes: mapping.notes || ''
+                                                                                });
+                                                                                setShowEditMappingModal(true);
+                                                                            }}
+                                                                            style={{
+                                                                                padding: '6px 12px',
+                                                                                fontSize: '13px',
+                                                                                backgroundColor: '#f59e0b',
+                                                                                color: 'white',
+                                                                                border: 'none',
+                                                                                borderRadius: '3px',
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                        >
+                                                                            編輯
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleDeleteMapping(mapping.id, invItem.name)}
+                                                                            style={{
+                                                                                padding: '6px 12px',
+                                                                                fontSize: '13px',
+                                                                                backgroundColor: '#ef4444',
+                                                                                color: 'white',
+                                                                                border: 'none',
+                                                                                borderRadius: '3px',
+                                                                                cursor: 'pointer'
+                                                                            }}
+                                                                        >
+                                                                            刪除
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕🆕 添加配置 Modal（批量模式） */}
+                    {showAddMappingModal && selectedMenuItem && (
+                        <div className="modal" onClick={() => setShowAddMappingModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }}>
+                                <span className="close" onClick={() => setShowAddMappingModal(false)}>&times;</span>
+                                <h2>➕ 批量添加庫存配置 - {selectedMenuItem.name}</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', fontSize: '16px' }}>
+                                            選擇庫存品項 *
+                                            <span style={{ marginLeft: '10px', fontSize: '13px', color: '#6b7280', fontWeight: 'normal' }}>
+                                                （已選擇 {selectedInventoryItems.length} 項）
+                                            </span>
+                                        </label>
+                                        <div style={{
+                                            maxHeight: '300px',
+                                            overflowY: 'auto',
+                                            border: '2px solid #e5e7eb',
+                                            borderRadius: '8px',
+                                            padding: '12px',
+                                            background: '#fafbfc'
+                                        }}>
+                                            {inventoryItems.map(item => (
+                                                <label
+                                                    key={item.id}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        padding: '12px',
+                                                        marginBottom: '8px',
+                                                        background: 'white',
+                                                        border: '1px solid #e5e7eb',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedInventoryItems.includes(item.id)}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedInventoryItems([...selectedInventoryItems, item.id]);
+                                                            } else {
+                                                                setSelectedInventoryItems(selectedInventoryItems.filter(id => id !== item.id));
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            width: '18px',
+                                                            height: '18px',
+                                                            marginRight: '12px',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    />
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#111827' }}>
+                                                            {item.name}
+                                                        </div>
+                                                        <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
+                                                            <span style={{
+                                                                display: 'inline-block',
+                                                                padding: '2px 8px',
+                                                                background: '#e0e7ff',
+                                                                color: '#3730a3',
+                                                                borderRadius: '4px',
+                                                                fontSize: '11px',
+                                                                marginRight: '8px'
+                                                            }}>
+                                                                {item.item_type}
+                                                            </span>
+                                                            庫存: <strong>{item.qty_on_hand}</strong> {item.unit}
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={() => setSelectedInventoryItems(inventoryItems.map(i => i.id))}
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    fontSize: '13px',
+                                                    background: '#f3f4f6',
+                                                    border: '1px solid #d1d5db',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                ✅ 全選
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedInventoryItems([])}
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    fontSize: '13px',
+                                                    background: '#f3f4f6',
+                                                    border: '1px solid #d1d5db',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                ❌ 清空
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>每份用量 *</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={addMappingForm.qtyPerSale}
+                                            onChange={(e) => setAddMappingForm({...addMappingForm, qtyPerSale: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>備註（可選）</label>
+                                        <input
+                                            type="text"
+                                            value={addMappingForm.notes || ''}
+                                            onChange={(e) => setAddMappingForm({...addMappingForm, notes: e.target.value})}
+                                            placeholder="例如：便當盒、湯杯、食材等"
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button
+                                            onClick={handleAddMapping}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#10b981',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            確認添加
+                                        </button>
+                                        <button
+                                            onClick={() => setShowAddMappingModal(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#6b7280',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px'
+                                            }}
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 🆕🆕 编辑配置 Modal */}
+                    {showEditMappingModal && (
+                        <div className="modal" onClick={() => setShowEditMappingModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <span className="close" onClick={() => setShowEditMappingModal(false)}>&times;</span>
+                                <h2>✏️ 編輯配置</h2>
+                                <div style={{ marginTop: '20px' }}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>每份用量 *</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={editMappingForm.qty_per_sale}
+                                            onChange={(e) => setEditMappingForm({...editMappingForm, qty_per_sale: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>備註（可選）</label>
+                                        <input
+                                            type="text"
+                                            value={editMappingForm.notes || ''}
+                                            onChange={(e) => setEditMappingForm({...editMappingForm, notes: e.target.value})}
+                                            style={{ width: '100%', padding: '10px', fontSize: '16px', border: '1px solid #ddd', borderRadius: '4px' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                        <button
+                                            onClick={handleUpdateMapping}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#f59e0b',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            確認更新
+                                        </button>
+                                        <button
+                                            onClick={() => setShowEditMappingModal(false)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px',
+                                                backgroundColor: '#6b7280',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '16px'
+                                            }}
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -2233,6 +4417,10 @@
             };
 
             const handleUpdateOrder = async (orderId, updatedOrder) => {
+                // 获取原订单状态
+                const oldOrder = orders.find(o => o.id === orderId);
+                const oldStatus = oldOrder ? oldOrder.status : null;
+
                 const updatedOrders = orders.map(order =>
                     order.id === orderId ? updatedOrder : order
                 );
@@ -2240,6 +4428,52 @@
 
                 // 更新到 Supabase
                 await updateOrderInSupabase(orderId, updatedOrder);
+
+                // 🚀 如果订单状态变为 accepted，自动扣除包材库存
+                if (updatedOrder.status === 'accepted' && oldStatus !== 'accepted') {
+                    console.log('📦 订单已接受，开始扣除包材库存...', orderId);
+
+                    try {
+                        if (!window.supabaseClient) {
+                            console.warn('⚠️ Supabase client not available, skipping inventory deduction');
+                            return;
+                        }
+
+                        const { data, error } = await window.supabaseClient
+                            .rpc('consume_inventory_for_order', {
+                                p_order_id: orderId
+                            });
+
+                        if (error) {
+                            console.error('❌ 扣库存失败:', error);
+                            alert('⚠️ 订单已接受，但包材库存扣除失败：\n' + error.message + '\n\n请检查包材配置或手动调整库存。');
+                            return;
+                        }
+
+                        if (!data.success) {
+                            console.error('❌ 库存不足:', data);
+                            alert('⚠️ ' + data.message + '\n\n请补充包材库存后再接受订单。');
+                            // 可选：回滚订单状态
+                            // updatedOrder.status = oldStatus;
+                            // await updateOrderInSupabase(orderId, updatedOrder);
+                            return;
+                        }
+
+                        console.log('✅ 包材库存扣除成功:', data);
+
+                        // 显示扣除详情
+                        if (data.deductions && data.deductions.length > 0) {
+                            const deductionDetails = data.deductions
+                                .map(d => `  • ${d.packaging}: -${d.qty_deducted} ${d.unit}`)
+                                .join('\n');
+                            console.log('📦 扣除明细:\n' + deductionDetails);
+                        }
+
+                    } catch (err) {
+                        console.error('❌ 扣库存异常:', err);
+                        alert('扣库存失败：' + err.message + '\n\n请检查包材配置。');
+                    }
+                }
 
                 // 備用：保存到 localStorage
                 saveToLocalStorage('orders', updatedOrders);
@@ -2274,6 +4508,7 @@
                 { id: 'orders', icon: '📦', label: '訂單管理' },
                 { id: 'menu', icon: '🍱', label: '菜單管理' },
                 { id: 'options', icon: '⚙️', label: '附加選項管理' },
+                { id: 'inventory', icon: '📦', label: '庫存管理' },
                 { id: 'statistics', icon: '📈', label: '統計報表' }
             ];
 
@@ -2282,6 +4517,7 @@
                 orders: '訂單管理',
                 menu: '菜單管理',
                 options: '附加選項管理',
+                inventory: '庫存管理',
                 statistics: '統計報表'
             };
 
@@ -2290,6 +4526,7 @@
                 orders: '管理所有訂單狀態',
                 menu: '編輯菜單項目與供應狀態',
                 options: '管理可供選擇的附加選項，如辣度、飲料、大小等',
+                inventory: '管理庫存、快速調整、查看預警',
                 statistics: '查看營收與銷售統計'
             };
 
@@ -2351,6 +4588,9 @@
                                 )}
                                 {currentView === 'statistics' && (
                                     <Statistics orders={orders} menu={menu} />
+                                )}
+                                {currentView === 'inventory' && (
+                                    <InventoryManagement />
                                 )}
                             </div>
                         </main>

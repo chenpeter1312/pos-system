@@ -3698,20 +3698,25 @@
                         return;
                     }
 
-                    // 轉換數據庫字段到前端格式
-                    const normalizedLibrary = (optionsData || []).map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        type: item.type,
-                        required: item.required || false,
-                        isEnabled: item.is_enabled !== false,
-                        categories: item.categories || ['highlight', 'fried', 'bento'],
-                        choices: (item.choices || []).map(choice => ({
-                            label: choice.label,
-                            price: parseFloat(choice.price || 0),
-                            isEnabled: choice.isEnabled !== false
+                    // 轉換數據庫字段到前端格式，只保留啟用的選項和選項值
+                    const normalizedLibrary = (optionsData || [])
+                        .filter(item => item.is_enabled !== false)  // 只顯示啟用的選項
+                        .map(item => ({
+                            id: item.id,
+                            name: item.name,
+                            type: item.type,
+                            required: item.required || false,
+                            isEnabled: item.is_enabled !== false,
+                            categories: item.categories || ['highlight', 'fried', 'bento'],
+                            choices: (item.choices || [])
+                                .filter(choice => choice.enabled !== false)  // 只顯示啟用的選項值
+                                .map(choice => ({
+                                    label: choice.label,
+                                    price: parseFloat(choice.price || 0),
+                                    isEnabled: choice.enabled !== false
+                                }))
                         }))
-                    }));
+                        .filter(item => item.choices.length > 0);  // 移除沒有可用選項值的選項
 
                     setOptionsLibrary(normalizedLibrary);
                     console.log(`✅ Loaded ${normalizedLibrary.length} options from Supabase`);
@@ -3737,14 +3742,19 @@
                 setMenu(normalizedMenu);
 
                 const libraryData = JSON.parse(localStorage.getItem('optionsLibrary') || '[]');
-                const normalizedLibrary = libraryData.map(item => ({
-                    ...item,
-                    categories: item.categories || ['highlight', 'fried', 'bento'],
-                    choices: item.choices.map(choice => ({
-                        ...choice,
-                        isEnabled: choice.isEnabled !== undefined ? choice.isEnabled : true
+                const normalizedLibrary = libraryData
+                    .filter(item => item.isEnabled !== false && item.is_enabled !== false)  // 只顯示啟用的選項
+                    .map(item => ({
+                        ...item,
+                        categories: item.categories || ['highlight', 'fried', 'bento'],
+                        choices: item.choices
+                            .filter(choice => choice.enabled !== false && choice.isEnabled !== false)  // 只顯示啟用的選項值
+                            .map(choice => ({
+                                ...choice,
+                                isEnabled: choice.isEnabled !== undefined ? choice.isEnabled : true
+                            }))
                     }))
-                }));
+                    .filter(item => item.choices.length > 0);  // 移除沒有可用選項值的選項
                 setOptionsLibrary(normalizedLibrary);
             };
 
