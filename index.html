@@ -3504,8 +3504,12 @@
             const [selectedOptions, setSelectedOptions] = useState({});
             const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '' });
             const [tip, setTip] = useState(0);
+            const [selectedTipPercent, setSelectedTipPercent] = useState(null);
             const [isProcessingPayment, setIsProcessingPayment] = useState(false);
             const [cardholderName, setCardholderName] = useState('');
+            const [cardNumber, setCardNumber] = useState('');
+            const [expiryDate, setExpiryDate] = useState('');
+            const [cvv, setCvv] = useState('');
             const [showModeSelector, setShowModeSelector] = useState(true);
             const [orderMode, setOrderMode] = useState(null); // 'dine-in', 'takeout', 'scheduled'
             const [scheduledTime, setScheduledTime] = useState('');
@@ -3526,6 +3530,50 @@
                 const browserLang = navigator.language.toLowerCase();
                 return browserLang.indexOf('zh') >= 0 ? 'zh' : 'en';
             }());
+
+            // 格式化信用卡號（每4位數加空格）
+            const formatCardNumber = (value) => {
+                const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                const matches = v.match(/\d{4,16}/g);
+                const match = (matches && matches[0]) || '';
+                const parts = [];
+                for (let i = 0, len = match.length; i < len; i += 4) {
+                    parts.push(match.substring(i, i + 4));
+                }
+                if (parts.length) {
+                    return parts.join(' ');
+                } else {
+                    return value;
+                }
+            };
+
+            // 格式化有效期限（MM/YY）
+            const formatExpiryDate = (value) => {
+                const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                if (v.length >= 2) {
+                    return v.substring(0, 2) + (v.length > 2 ? ' / ' + v.substring(2, 4) : '');
+                }
+                return v;
+            };
+
+            // 處理卡號輸入
+            const handleCardNumberChange = (e) => {
+                const formatted = formatCardNumber(e.target.value);
+                setCardNumber(formatted);
+            };
+
+            // 處理有效期限輸入
+            const handleExpiryChange = (e) => {
+                const value = e.target.value.replace(/[^0-9]/gi, '');
+                const formatted = formatExpiryDate(value);
+                setExpiryDate(formatted);
+            };
+
+            // 處理CVV輸入（只允許數字）
+            const handleCvvChange = (e) => {
+                const value = e.target.value.replace(/[^0-9]/gi, '');
+                setCvv(value);
+            };
 
             const TAX_RATE = 0.0825;
 
@@ -3960,7 +4008,7 @@
                 }
             };
 
-            // 处理订单
+            // 处理订单（v2 安全架構 - 使用 API）
             const processOrder = async (orderItems) => {
                 // 驗證必填欄位
                 if (!customerInfo.name || !customerInfo.phone) {
@@ -3977,79 +4025,88 @@
                 setIsProcessingPayment(true);
 
                 try {
-                    // 模擬支付處理（2秒）
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
                     const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                     const tax = subtotal * TAX_RATE;
                     const total = subtotal + tax + tip;
 
-                    const newOrder = {
-                        id: Date.now(),
-                        orderNumber: `#${Date.now().toString().slice(-6)}`,
-                        customer: customerInfo,
-                        items: orderItems,
-                        subtotal: subtotal,
-                        tax: tax,
-                        tip: tip,
-                        total: total,
-                        status: 'new',
-                        paymentStatus: 'Paid',
-                        paymentMethod: '信用卡',
-                        cardholderName: cardholderName,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
+                    // ✅ v2.1 Stripe Pending Order 安全架構
+                    // Step 1: 創建 pending order + Stripe PaymentIntent
+                    console.log('🎫 Creating pending order + PaymentIntent via API...');
+
+                    // 生成 UUID 作為 idempotency key（防止重複下單）
+                    const clientOrderId = crypto.randomUUID();
+
+                    // 準備訂單資料（只包含 menuItemId 和 quantity）
+                    // ⚠️ 注意：不傳遞價格，後端會從資料庫查詢真實價格
+                    const orderPayload = {
+                        clientOrderId: clientOrderId,
+                        customerName: customerInfo.name,
+                        phone: customerInfo.phone,
+                        email: customerInfo.email || null,
+                        orderType: orderMode || 'dine_in',
+                        items: orderItems.map(item => ({
+                            menuItemId: item.id,
+                            quantity: item.quantity
+                        }))
                     };
 
-                    // 保存訂單到 Supabase
-                    if (window.supabaseReady && window.supabaseClient) {
-                        try {
-                            console.log('💾 Saving order to Supabase...');
+                    // Step 2: 呼叫 Stripe PaymentIntent API
+                    const response = await fetch('/api/stripe/create-payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(orderPayload)
+                    });
 
-                            const orderForDb = {
-                                id: newOrder.id,
-                                customer_name: customerInfo.name,
-                                phone: customerInfo.phone,
-                                service_mode: customerInfo.serviceMode || 'dine-in',
-                                items: orderItems,
-                                subtotal: subtotal,
-                                tax: tax,
-                                total_price: total,
-                                total: total,
-                                status: 'new',
-                                order_source: 'qr',
-                                payment_method: 'stripe',
-                                payment_status: 'paid',
-                                notes: customerInfo.notes || null,
-                                scheduled_time: customerInfo.scheduledTime || null,
-                                created_at: new Date().toISOString()
-                            };
+                    const result = await response.json();
 
-                            const { data, error } = await window.supabaseClient
-                                .from('orders')
-                                .insert([orderForDb])
-                                .select();
-
-                            if (error) {
-                                console.error('❌ Error saving order to Supabase:', error);
-                                // 備用：保存到 localStorage
-                                const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                                localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
-                            } else {
-                                console.log('✅ Order saved to Supabase:', data);
-                            }
-                        } catch (error) {
-                            console.error('❌ Error:', error);
-                            // 備用：保存到 localStorage
-                            const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                            localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
-                        }
-                    } else {
-                        // Supabase 未就緒，使用 localStorage
-                        console.log('⚠️ Supabase not ready, saving to localStorage');
-                        const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                        localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.error || 'Failed to create payment intent');
                     }
+
+                    console.log('✅ Pending order created:', result.orderId);
+                    console.log('💳 PaymentIntent client_secret received');
+
+                    const { clientSecret, orderId, amount } = result;
+
+                    // Step 3: 確認付款 (Stripe.js)
+                    // Note: 需要先初始化 Stripe Elements（請看下方註解）
+                    console.log('🔐 Confirming payment with Stripe...');
+
+                    // ⚠️ TODO: 整合 Stripe Elements UI
+                    // 目前為簡化版本，使用模擬付款
+                    // 生產環境需要使用真實的 Stripe card element
+
+                    // 模擬付款成功（開發測試用）
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    /*
+                    // 🔧 生產環境應使用以下程式碼：
+                    const stripe = Stripe('your_publishable_key');
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: {
+                            card: cardElement, // Stripe Card Element
+                            billing_details: {
+                                name: cardholderName
+                            }
+                        }
+                    });
+
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+
+                    if (paymentIntent.status !== 'succeeded') {
+                        throw new Error('Payment failed');
+                    }
+                    */
+
+                    console.log('✅ Payment confirmed (simulated)');
+                    console.log('📨 Webhook will update order status to "paid"');
+
+                    // Step 4: 付款成功，顯示訂單資訊
+                    const orderNumber = orderId;
 
                     setCart([]);
                     setTip(0);
@@ -4058,18 +4115,31 @@
                     setIsProcessingPayment(false);
                     setShowCheckoutModal(false);
 
-                    alert(`✅ ${t('paymentSuccess')}\n${t('orderNumber')}：${newOrder.orderNumber}\n\n${t('thankYou')}`);
+                    alert(`✅ ${t('paymentSuccess')}\n${t('orderNumber')}：#${orderNumber}\n\n${t('thankYou')}\n\n💡 Note: In production, this would use real Stripe payment.`);
 
                     // 自动打开订单追踪 Modal
+                    const newOrder = {
+                        id: orderNumber,
+                        customer: customerInfo,
+                        items: orderItems,
+                        subtotal: subtotal,
+                        tax: tax,
+                        tip: tip,
+                        total: total,
+                        status: 'pending', // 訂單狀態為 pending，等待 webhook 更新為 paid
+                        orderNumber: `#${orderNumber}`
+                    };
+
                     setTrackingOrder(newOrder);
                     setTrackingInput({
-                        orderId: newOrder.id.toString(),
-                        phone: newOrder.customer.phone
+                        orderId: orderNumber.toString(),
+                        phone: customerInfo.phone
                     });
                     setShowTrackingModal(true);
                 } catch (error) {
+                    console.error('❌ Payment error:', error);
                     setIsProcessingPayment(false);
-                    alert('付款失敗，請重試');
+                    alert(`付款失敗：${error.message || '請稍後重試'}\n\n如果訂單已創建，請聯絡店家確認。`);
                 }
             };
 
@@ -4728,45 +4798,65 @@
                                             {/* 按趴數 + 自訂 */}
                                             <div>
                                                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                                    {[0, 10, 15, 18].map(percent => (
-                                                        <button
-                                                            key={percent}
-                                                            onClick={() => setTip(calculateSubtotal() * percent / 100)}
-                                                            style={{
-                                                                flex: '1',
-                                                                minWidth: '55px',
-                                                                padding: '8px 12px',
-                                                                border: '2px solid #2d5016',
-                                                                background: 'white',
-                                                                borderRadius: '6px',
-                                                                cursor: 'pointer',
-                                                                fontSize: '14px',
-                                                                fontWeight: '600',
-                                                                color: '#2d5016',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                            onMouseOver={(e) => {
-                                                                e.target.style.background = '#2d5016';
-                                                                e.target.style.color = 'white';
-                                                            }}
-                                                            onMouseOut={(e) => {
-                                                                e.target.style.background = 'white';
-                                                                e.target.style.color = '#2d5016';
-                                                            }}
-                                                        >
-                                                            {percent}%
-                                                        </button>
-                                                    ))}
+                                                    {[0, 10, 15, 18].map(percent => {
+                                                        const isSelected = selectedTipPercent === percent;
+                                                        return (
+                                                            <button
+                                                                key={percent}
+                                                                onClick={() => {
+                                                                    setTip(calculateSubtotal() * percent / 100);
+                                                                    setSelectedTipPercent(percent);
+                                                                }}
+                                                                style={{
+                                                                    flex: '1',
+                                                                    minWidth: '55px',
+                                                                    padding: '8px 12px',
+                                                                    border: `2px solid ${isSelected ? '#2d5016' : '#2d5016'}`,
+                                                                    background: isSelected ? '#2d5016' : 'white',
+                                                                    borderRadius: '6px',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '14px',
+                                                                    fontWeight: '600',
+                                                                    color: isSelected ? 'white' : '#2d5016',
+                                                                    transition: 'all 0.2s',
+                                                                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                                                                    boxShadow: isSelected ? '0 4px 12px rgba(45, 80, 22, 0.3)' : 'none'
+                                                                }}
+                                                                onMouseOver={(e) => {
+                                                                    if (!isSelected) {
+                                                                        e.target.style.background = '#2d5016';
+                                                                        e.target.style.color = 'white';
+                                                                    }
+                                                                }}
+                                                                onMouseOut={(e) => {
+                                                                    if (!isSelected) {
+                                                                        e.target.style.background = 'white';
+                                                                        e.target.style.color = '#2d5016';
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {percent}%
+                                                            </button>
+                                                        );
+                                                    })}
                                                     {/* 自訂按鈕 */}
                                                     <button
                                                         onClick={() => {
-                                                            const customAmount = prompt('請輸入小費金額 (整數, 例如: 5)：');
+                                                            const customAmount = prompt('請輸入小費金額 (可含小數點一位, 例如: 5 或 5.5)：');
                                                             if (customAmount !== null && customAmount !== '') {
-                                                                const amount = parseInt(customAmount);
-                                                                if (!isNaN(amount) && amount > 0 && Number.isInteger(parseFloat(customAmount))) {
-                                                                    setTip(amount);
+                                                                const amount = parseFloat(customAmount);
+                                                                // 檢查是否為有效數字且為正數
+                                                                if (!isNaN(amount) && amount > 0) {
+                                                                    // 檢查小數點位數（最多一位）
+                                                                    const decimalPlaces = (customAmount.split('.')[1] || '').length;
+                                                                    if (decimalPlaces <= 1) {
+                                                                        setTip(amount);
+                                                                        setSelectedTipPercent('custom');
+                                                                    } else {
+                                                                        alert('小數點最多只能一位（例如：5.5）');
+                                                                    }
                                                                 } else {
-                                                                    alert('請輸入有效的整數金額（> 0）');
+                                                                    alert('請輸入有效的正數金額（> 0）');
                                                                 }
                                                             }
                                                         }}
@@ -4774,22 +4864,28 @@
                                                             flex: '1',
                                                             minWidth: '55px',
                                                             padding: '8px 12px',
-                                                            border: '2px solid #8b5cf6',
-                                                            background: 'white',
+                                                            border: `2px solid ${selectedTipPercent === 'custom' ? '#8b5cf6' : '#8b5cf6'}`,
+                                                            background: selectedTipPercent === 'custom' ? '#8b5cf6' : 'white',
                                                             borderRadius: '6px',
                                                             cursor: 'pointer',
                                                             fontSize: '14px',
                                                             fontWeight: '600',
-                                                            color: '#8b5cf6',
-                                                            transition: 'all 0.2s'
+                                                            color: selectedTipPercent === 'custom' ? 'white' : '#8b5cf6',
+                                                            transition: 'all 0.2s',
+                                                            transform: selectedTipPercent === 'custom' ? 'scale(1.05)' : 'scale(1)',
+                                                            boxShadow: selectedTipPercent === 'custom' ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none'
                                                         }}
                                                         onMouseOver={(e) => {
-                                                            e.target.style.background = '#8b5cf6';
-                                                            e.target.style.color = 'white';
+                                                            if (selectedTipPercent !== 'custom') {
+                                                                e.target.style.background = '#8b5cf6';
+                                                                e.target.style.color = 'white';
+                                                            }
                                                         }}
                                                         onMouseOut={(e) => {
-                                                            e.target.style.background = 'white';
-                                                            e.target.style.color = '#8b5cf6';
+                                                            if (selectedTipPercent !== 'custom') {
+                                                                e.target.style.background = 'white';
+                                                                e.target.style.color = '#8b5cf6';
+                                                            }
                                                         }}
                                                     >
                                                         ✏️ 自訂
@@ -4886,6 +4982,8 @@
                                             <span style={{ fontSize: '20px' }}>💳</span>
                                             <input
                                                 type="text"
+                                                value={cardNumber}
+                                                onChange={handleCardNumberChange}
                                                 placeholder="4242 4242 4242 4242"
                                                 style={{
                                                     flex: 1,
@@ -4916,6 +5014,8 @@
                                                 <span style={{ fontSize: '16px' }}>📅</span>
                                                 <input
                                                     type="text"
+                                                    value={expiryDate}
+                                                    onChange={handleExpiryChange}
                                                     placeholder="MM / YY"
                                                     style={{
                                                         flex: 1,
@@ -4944,6 +5044,8 @@
                                                 <span style={{ fontSize: '16px' }}>🔒</span>
                                                 <input
                                                     type="text"
+                                                    value={cvv}
+                                                    onChange={handleCvvChange}
                                                     placeholder="123"
                                                     style={{
                                                         flex: 1,
