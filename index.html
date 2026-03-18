@@ -3962,11 +3962,6 @@
             };
 
             const submitOrder = () => {
-                if (!customerInfo.name || !customerInfo.phone) {
-                    alert('請填寫姓名和電話！');
-                    return;
-                }
-
                 // 检查购物车中的售罄商品
                 const unavailableItems = cart.filter(cartItem => {
                     const menuItem = menu.find(m => m.id === cartItem.id);
@@ -4008,17 +4003,12 @@
 
             // 处理订单（現金版 - 不連接 Stripe，到櫃檯付款）
             const processOrder = async (orderItems) => {
-                if (!customerInfo.name || !customerInfo.phone) {
-                    alert('請填寫姓名和電話');
-                    return;
-                }
-
                 setIsProcessingPayment(true);
 
                 try {
                     const subtotal = orderItems.reduce((sum, item) => sum + ((item.finalPrice || item.price) * item.quantity), 0);
                     const tax = subtotal * TAX_RATE;
-                    const total = subtotal + tax + tip;
+                    const total = subtotal + tax;
 
                     const clientOrderId = crypto.randomUUID();
 
@@ -4027,9 +4017,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             clientOrderId,
-                            customerName: customerInfo.name,
-                            phone: customerInfo.phone,
-                            email: customerInfo.email || null,
+                            customerName: '客人',
                             orderType: orderMode || 'dine_in',
                             items: orderItems.map(item => ({
                                 menuItemId: item.id,
@@ -4047,27 +4035,10 @@
                     const orderNumber = result.orderId;
 
                     setCart([]);
-                    setTip(0);
-                    setSelectedTipPercent(null);
-                    setCustomerInfo({ name: '', phone: '' });
                     setIsProcessingPayment(false);
                     setShowCheckoutModal(false);
 
-                    const newOrder = {
-                        id: orderNumber,
-                        customer: customerInfo,
-                        items: orderItems,
-                        subtotal,
-                        tax,
-                        tip,
-                        total,
-                        status: 'new',
-                        orderNumber: `#${orderNumber}`
-                    };
-
-                    setTrackingOrder(newOrder);
-                    setTrackingInput({ orderId: orderNumber.toString(), phone: customerInfo.phone });
-                    setShowTrackingModal(true);
+                    alert(`✅ 訂單 #${orderNumber} 已送出！\n請到櫃檯付款，謝謝！`);
                 } catch (error) {
                     console.error('❌ Order error:', error);
                     setIsProcessingPayment(false);
@@ -4722,159 +4693,24 @@
                                             <span>稅金 (Tax 8.25%)</span>
                                             <span>${calculateTax().toFixed(2)}</span>
                                         </div>
-                                        <div style={{ marginTop: '12px', padding: '12px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-                                            <div style={{ marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#374151' }}>
-                                                💰 小費 (Tip)
-                                            </div>
-
-                                            {/* 按趴數 + 自訂 */}
-                                            <div>
-                                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                                    {[0, 10, 15, 18].map(percent => {
-                                                        const isSelected = selectedTipPercent === percent;
-                                                        return (
-                                                            <button
-                                                                key={percent}
-                                                                onClick={() => {
-                                                                    setTip(calculateSubtotal() * percent / 100);
-                                                                    setSelectedTipPercent(percent);
-                                                                }}
-                                                                style={{
-                                                                    flex: '1',
-                                                                    minWidth: '55px',
-                                                                    padding: '8px 12px',
-                                                                    border: `2px solid ${isSelected ? '#2d5016' : '#2d5016'}`,
-                                                                    background: isSelected ? '#2d5016' : 'white',
-                                                                    borderRadius: '6px',
-                                                                    cursor: 'pointer',
-                                                                    fontSize: '14px',
-                                                                    fontWeight: '600',
-                                                                    color: isSelected ? 'white' : '#2d5016',
-                                                                    transition: 'all 0.2s',
-                                                                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
-                                                                    boxShadow: isSelected ? '0 4px 12px rgba(45, 80, 22, 0.3)' : 'none'
-                                                                }}
-                                                                onMouseOver={(e) => {
-                                                                    if (!isSelected) {
-                                                                        e.target.style.background = '#2d5016';
-                                                                        e.target.style.color = 'white';
-                                                                    }
-                                                                }}
-                                                                onMouseOut={(e) => {
-                                                                    if (!isSelected) {
-                                                                        e.target.style.background = 'white';
-                                                                        e.target.style.color = '#2d5016';
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {percent}%
-                                                            </button>
-                                                        );
-                                                    })}
-                                                    {/* 自訂按鈕 */}
-                                                    <button
-                                                        onClick={() => {
-                                                            const customAmount = prompt('請輸入小費金額 (可含小數點一位, 例如: 5 或 5.5)：');
-                                                            if (customAmount !== null && customAmount !== '') {
-                                                                const amount = parseFloat(customAmount);
-                                                                // 檢查是否為有效數字且為正數
-                                                                if (!isNaN(amount) && amount > 0) {
-                                                                    // 檢查小數點位數（最多一位）
-                                                                    const decimalPlaces = (customAmount.split('.')[1] || '').length;
-                                                                    if (decimalPlaces <= 1) {
-                                                                        setTip(amount);
-                                                                        setSelectedTipPercent('custom');
-                                                                    } else {
-                                                                        alert('小數點最多只能一位（例如：5.5）');
-                                                                    }
-                                                                } else {
-                                                                    alert('請輸入有效的正數金額（> 0）');
-                                                                }
-                                                            }
-                                                        }}
-                                                        style={{
-                                                            flex: '1',
-                                                            minWidth: '55px',
-                                                            padding: '8px 12px',
-                                                            border: `2px solid ${selectedTipPercent === 'custom' ? '#8b5cf6' : '#8b5cf6'}`,
-                                                            background: selectedTipPercent === 'custom' ? '#8b5cf6' : 'white',
-                                                            borderRadius: '6px',
-                                                            cursor: 'pointer',
-                                                            fontSize: '14px',
-                                                            fontWeight: '600',
-                                                            color: selectedTipPercent === 'custom' ? 'white' : '#8b5cf6',
-                                                            transition: 'all 0.2s',
-                                                            transform: selectedTipPercent === 'custom' ? 'scale(1.05)' : 'scale(1)',
-                                                            boxShadow: selectedTipPercent === 'custom' ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none'
-                                                        }}
-                                                        onMouseOver={(e) => {
-                                                            if (selectedTipPercent !== 'custom') {
-                                                                e.target.style.background = '#8b5cf6';
-                                                                e.target.style.color = 'white';
-                                                            }
-                                                        }}
-                                                        onMouseOut={(e) => {
-                                                            if (selectedTipPercent !== 'custom') {
-                                                                e.target.style.background = 'white';
-                                                                e.target.style.color = '#8b5cf6';
-                                                            }
-                                                        }}
-                                                    >
-                                                        ✏️ 自訂
-                                                    </button>
-                                                </div>
-                                                <div style={{ marginTop: '8px', fontSize: '12px', color: '#9ca3af', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <span>基於小計 ${calculateSubtotal().toFixed(2)}</span>
-                                                    {tip > 0 && (
-                                                        <span style={{ color: '#8b5cf6', fontWeight: '600' }}>
-                                                            已選：${tip.toFixed(2)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div className="order-item" style={{ marginTop: '10px', paddingTop: '10px', borderTop: '2px solid #2d5016' }}>
                                             <strong>總計 (Total)</strong>
-                                            <strong style={{ color: '#2d5016', fontSize: '18px' }}>${(calculateTotal() + tip).toFixed(2)}</strong>
+                                            <strong style={{ color: '#2d5016', fontSize: '18px' }}>${calculateTotal().toFixed(2)}</strong>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>姓名 *</label>
-                                    <input
-                                        type="text"
-                                        value={customerInfo.name}
-                                        onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                                        placeholder="請輸入姓名"
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>電話 *</label>
-                                    <input
-                                        type="tel"
-                                        value={customerInfo.phone}
-                                        onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                                        placeholder="請輸入電話"
-                                    />
                                 </div>
 
                                 {/* 付款提示 */}
                                 <div style={{
-                                    marginTop: '20px',
-                                    padding: '24px 20px',
+                                    marginTop: '16px',
+                                    padding: '16px',
                                     background: 'linear-gradient(135deg, #2d5016 0%, #4a7c28 100%)',
-                                    borderRadius: '12px',
+                                    borderRadius: '10px',
                                     textAlign: 'center',
-                                    boxShadow: '0 4px 15px rgba(45, 80, 22, 0.3)',
                                     border: '2px solid rgba(74, 124, 40, 0.4)'
                                 }}>
-                                    <div style={{ fontSize: '36px', marginBottom: '10px' }}>🏪</div>
-                                    <div style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>
-                                        請到櫃檯付款
-                                    </div>
-                                    <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px' }}>
-                                        送出訂單後，請至櫃檯完成付款
+                                    <div style={{ color: 'white', fontSize: '16px', fontWeight: '700' }}>
+                                        🏪 送出後請到櫃檯付款
                                     </div>
                                 </div>
 
