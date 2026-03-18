@@ -40,6 +40,8 @@
             font-family: 'Lora', 'Noto Serif TC', serif;
             background: linear-gradient(135deg, var(--wood-pale) 0%, var(--cream-dark) 100%);
             min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
             position: relative;
         }
 
@@ -1886,54 +1888,105 @@
             box-shadow: 0 4px 12px rgba(47, 82, 51, 0.3);
         }
 
-        /* ===== 手機版頂部 header 優化 ===== */
+        /* ===== 手機版全面修正 (600px) ===== */
         @media (max-width: 600px) {
-            .header {
-                padding: 10px 14px !important;
-                gap: 8px;
+
+            /* — Messenger WebView 修正 — */
+            .app {
+                padding: 0 !important;
+                padding-bottom: 90px !important;
             }
+
+            /* — Header：平面化，不做卡片，避免視覺疊層 — */
+            .header {
+                padding: 12px 16px !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-bottom: 1px solid rgba(212, 165, 116, 0.3) !important;
+                margin-bottom: 0 !important;
+                background: white !important;
+            }
+
+            /* Header 左側：logo + 標題 */
             .header h1 {
-                font-size: 15px !important;
-                gap: 8px !important;
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                gap: 10px !important;
+                max-width: 200px !important;
+                line-height: 1.3 !important;
+                white-space: normal !important;
             }
             .header h1 img {
-                height: 32px !important;
-                width: 32px !important;
+                height: 40px !important;
+                width: 40px !important;
+                flex-shrink: 0 !important;
             }
+
+            /* Header 右側按鈕 */
             .track-order-btn {
-                padding: 6px 10px !important;
+                padding: 7px 10px !important;
                 font-size: 12px !important;
+                white-space: nowrap !important;
             }
             .language-toggle-btn {
-                padding: 6px 10px !important;
+                padding: 7px 10px !important;
                 font-size: 12px !important;
                 min-width: unset !important;
+                white-space: nowrap !important;
             }
+
+            /* — Store Header：統一 padding，清楚分隔 — */
+            .store-header {
+                padding: 20px !important;
+                margin: 12px 12px 0 12px !important;
+                border-radius: 12px !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            }
+            .store-name {
+                font-size: 1.2rem !important;
+                margin-bottom: 4px !important;
+                line-height: 1.3 !important;
+            }
+            .open-badge {
+                font-size: 11px !important;
+                padding: 3px 8px !important;
+                margin-left: 8px !important;
+            }
+            .store-category {
+                font-size: 13px !important;
+                margin-bottom: 12px !important;
+            }
+            .store-info {
+                flex-direction: column !important;
+                gap: 6px !important;
+                font-size: 12px !important;
+                margin-top: 12px !important;
+                padding-top: 12px !important;
+            }
+
+            /* — Main Container — */
             .main-container {
                 padding: 12px !important;
             }
-            .store-header {
-                padding: 20px 16px !important;
-            }
-            .store-name {
-                font-size: 1.3rem !important;
-            }
-            .store-info {
-                font-size: 12px !important;
-            }
-            /* 搜尋欄 */
+
+            /* — 搜尋欄 — */
             .main-container input[type="text"] {
                 font-size: 16px !important;
                 padding: 12px 16px !important;
+                border-radius: 8px !important;
             }
-            /* 分類 tab 字體縮小 */
+
+            /* — 分類 Tab — */
             .category-tab {
                 padding: 8px 14px !important;
                 font-size: 13px !important;
             }
-            /* 菜單卡片緊湊 */
+
+            /* — 菜單卡片 — */
             .menu-card-horizontal {
                 height: 120px !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
             }
             .menu-card-content-left {
                 padding: 12px 14px !important;
@@ -1953,9 +2006,55 @@
                 height: 100px !important;
                 min-width: 100px !important;
             }
-            /* 確保 app 底部有空間給浮動按鈕 */
-            .app {
-                padding-bottom: 90px !important;
+
+            /* — Modal 底部彈出 — */
+            .modal {
+                padding: 0 !important;
+                align-items: flex-end !important;
+            }
+            .modal-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 92vh !important;
+                margin: 0 !important;
+                border-radius: 20px 20px 0 0 !important;
+                overflow-y: auto !important;
+            }
+            .modal-header {
+                padding: 18px 20px !important;
+                font-size: 17px !important;
+                position: sticky !important;
+                top: 0 !important;
+                background: white !important;
+                z-index: 10 !important;
+                border-bottom: 1px solid #e5e7eb !important;
+            }
+            .btn {
+                width: 100% !important;
+                min-height: 50px !important;
+                font-size: 16px !important;
+            }
+            .btn-group {
+                flex-direction: column !important;
+                gap: 10px !important;
+                padding: 16px !important;
+            }
+
+            /* — 浮動購物車 — */
+            .cart-float-button {
+                position: fixed !important;
+                bottom: 20px !important;
+                right: 16px !important;
+                left: 16px !important;
+                width: auto !important;
+                padding: 14px 20px !important;
+                font-size: 16px !important;
+                border-radius: 14px !important;
+                min-height: 54px !important;
+                box-shadow: 0 4px 20px rgba(193, 39, 45, 0.4) !important;
+                z-index: 1000 !important;
+                justify-content: center !important;
+                text-align: center !important;
             }
         }
     </style>
