@@ -7,8 +7,6 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4008,138 +4006,72 @@
                 }
             };
 
-            // 处理订单（v2 安全架構 - 使用 API）
+            // 处理订单（現金版 - 不連接 Stripe，到櫃檯付款）
             const processOrder = async (orderItems) => {
-                // 驗證必填欄位
                 if (!customerInfo.name || !customerInfo.phone) {
                     alert('請填寫姓名和電話');
                     return;
                 }
 
-                if (!cardholderName) {
-                    alert('請填寫持卡人姓名');
-                    return;
-                }
-
-                // 開始付款處理
                 setIsProcessingPayment(true);
 
                 try {
-                    const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const subtotal = orderItems.reduce((sum, item) => sum + ((item.finalPrice || item.price) * item.quantity), 0);
                     const tax = subtotal * TAX_RATE;
                     const total = subtotal + tax + tip;
 
-                    // ✅ v2.1 Stripe Pending Order 安全架構
-                    // Step 1: 創建 pending order + Stripe PaymentIntent
-                    console.log('🎫 Creating pending order + PaymentIntent via API...');
-
-                    // 生成 UUID 作為 idempotency key（防止重複下單）
                     const clientOrderId = crypto.randomUUID();
 
-                    // 準備訂單資料（只包含 menuItemId 和 quantity）
-                    // ⚠️ 注意：不傳遞價格，後端會從資料庫查詢真實價格
-                    const orderPayload = {
-                        clientOrderId: clientOrderId,
-                        customerName: customerInfo.name,
-                        phone: customerInfo.phone,
-                        email: customerInfo.email || null,
-                        orderType: orderMode || 'dine_in',
-                        items: orderItems.map(item => ({
-                            menuItemId: item.id,
-                            quantity: item.quantity
-                        }))
-                    };
-
-                    // Step 2: 呼叫 Stripe PaymentIntent API
-                    const response = await fetch('/api/stripe/create-payment-intent', {
+                    const response = await fetch('/api/orders/create-cash', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(orderPayload)
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            clientOrderId,
+                            customerName: customerInfo.name,
+                            phone: customerInfo.phone,
+                            email: customerInfo.email || null,
+                            orderType: orderMode || 'dine_in',
+                            items: orderItems.map(item => ({
+                                menuItemId: item.id,
+                                quantity: item.quantity
+                            }))
+                        })
                     });
 
                     const result = await response.json();
 
                     if (!response.ok || !result.success) {
-                        throw new Error(result.error || 'Failed to create payment intent');
+                        throw new Error(result.error || '訂單送出失敗');
                     }
 
-                    console.log('✅ Pending order created:', result.orderId);
-                    console.log('💳 PaymentIntent client_secret received');
-
-                    const { clientSecret, orderId, amount } = result;
-
-                    // Step 3: 確認付款 (Stripe.js)
-                    // Note: 需要先初始化 Stripe Elements（請看下方註解）
-                    console.log('🔐 Confirming payment with Stripe...');
-
-                    // ⚠️ TODO: 整合 Stripe Elements UI
-                    // 目前為簡化版本，使用模擬付款
-                    // 生產環境需要使用真實的 Stripe card element
-
-                    // 模擬付款成功（開發測試用）
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    /*
-                    // 🔧 生產環境應使用以下程式碼：
-                    const stripe = Stripe('your_publishable_key');
-                    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                        payment_method: {
-                            card: cardElement, // Stripe Card Element
-                            billing_details: {
-                                name: cardholderName
-                            }
-                        }
-                    });
-
-                    if (error) {
-                        throw new Error(error.message);
-                    }
-
-                    if (paymentIntent.status !== 'succeeded') {
-                        throw new Error('Payment failed');
-                    }
-                    */
-
-                    console.log('✅ Payment confirmed (simulated)');
-                    console.log('📨 Webhook will update order status to "paid"');
-
-                    // Step 4: 付款成功，顯示訂單資訊
-                    const orderNumber = orderId;
+                    const orderNumber = result.orderId;
 
                     setCart([]);
                     setTip(0);
+                    setSelectedTipPercent(null);
                     setCustomerInfo({ name: '', phone: '' });
-                    setCardholderName('');
                     setIsProcessingPayment(false);
                     setShowCheckoutModal(false);
 
-                    alert(`✅ ${t('paymentSuccess')}\n${t('orderNumber')}：#${orderNumber}\n\n${t('thankYou')}\n\n💡 Note: In production, this would use real Stripe payment.`);
-
-                    // 自动打开订单追踪 Modal
                     const newOrder = {
                         id: orderNumber,
                         customer: customerInfo,
                         items: orderItems,
-                        subtotal: subtotal,
-                        tax: tax,
-                        tip: tip,
-                        total: total,
-                        status: 'pending', // 訂單狀態為 pending，等待 webhook 更新為 paid
+                        subtotal,
+                        tax,
+                        tip,
+                        total,
+                        status: 'new',
                         orderNumber: `#${orderNumber}`
                     };
 
                     setTrackingOrder(newOrder);
-                    setTrackingInput({
-                        orderId: orderNumber.toString(),
-                        phone: customerInfo.phone
-                    });
+                    setTrackingInput({ orderId: orderNumber.toString(), phone: customerInfo.phone });
                     setShowTrackingModal(true);
                 } catch (error) {
-                    console.error('❌ Payment error:', error);
+                    console.error('❌ Order error:', error);
                     setIsProcessingPayment(false);
-                    alert(`付款失敗：${error.message || '請稍後重試'}\n\n如果訂單已創建，請聯絡店家確認。`);
+                    alert(`訂單送出失敗：${error.message || '請稍後重試'}`);
                 }
             };
 
@@ -4927,150 +4859,22 @@
                                     />
                                 </div>
 
-                                {/* 信用卡付款區塊 */}
+                                {/* 付款提示 */}
                                 <div style={{
                                     marginTop: '20px',
-                                    padding: '20px',
-                                    background: 'linear-gradient(135deg, #8B6F47 0%, #6B4423 100%)',
+                                    padding: '24px 20px',
+                                    background: 'linear-gradient(135deg, #2d5016 0%, #4a7c28 100%)',
                                     borderRadius: '12px',
-                                    boxShadow: '0 4px 15px rgba(107, 68, 35, 0.3)',
-                                    border: '2px solid rgba(212, 165, 116, 0.3)'
+                                    textAlign: 'center',
+                                    boxShadow: '0 4px 15px rgba(45, 80, 22, 0.3)',
+                                    border: '2px solid rgba(74, 124, 40, 0.4)'
                                 }}>
-                                    <div style={{
-                                        color: 'white',
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        marginBottom: '15px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px'
-                                    }}>
-                                        💳 信用卡付款
+                                    <div style={{ fontSize: '36px', marginBottom: '10px' }}>🏪</div>
+                                    <div style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>
+                                        請到櫃檯付款
                                     </div>
-
-                                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                                        <label style={{ color: 'white', fontSize: '14px' }}>持卡人姓名 *</label>
-                                        <input
-                                            type="text"
-                                            value={cardholderName}
-                                            onChange={(e) => setCardholderName(e.target.value)}
-                                            placeholder="請輸入持卡人姓名"
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px',
-                                                border: '2px solid rgba(255, 255, 255, 0.3)',
-                                                borderRadius: '8px',
-                                                fontSize: '15px',
-                                                background: 'rgba(255, 255, 255, 0.95)',
-                                                fontWeight: '500'
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label style={{ color: 'white', fontSize: '14px' }}>卡號 *</label>
-                                        <div style={{
-                                            padding: '12px 16px',
-                                            background: 'rgba(255, 255, 255, 0.95)',
-                                            borderRadius: '8px',
-                                            border: '2px solid rgba(255, 255, 255, 0.3)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            minHeight: '48px'
-                                        }}>
-                                            <span style={{ fontSize: '20px' }}>💳</span>
-                                            <input
-                                                type="text"
-                                                value={cardNumber}
-                                                onChange={handleCardNumberChange}
-                                                placeholder="4242 4242 4242 4242"
-                                                style={{
-                                                    flex: 1,
-                                                    border: 'none',
-                                                    outline: 'none',
-                                                    fontSize: '15px',
-                                                    fontWeight: '500',
-                                                    background: 'transparent',
-                                                    letterSpacing: '1px'
-                                                }}
-                                                maxLength="19"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                                        <div className="form-group" style={{ flex: 1 }}>
-                                            <label style={{ color: 'white', fontSize: '14px' }}>有效期限 *</label>
-                                            <div style={{
-                                                padding: '12px 16px',
-                                                background: 'rgba(255, 255, 255, 0.95)',
-                                                borderRadius: '8px',
-                                                border: '2px solid rgba(255, 255, 255, 0.3)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px'
-                                            }}>
-                                                <span style={{ fontSize: '16px' }}>📅</span>
-                                                <input
-                                                    type="text"
-                                                    value={expiryDate}
-                                                    onChange={handleExpiryChange}
-                                                    placeholder="MM / YY"
-                                                    style={{
-                                                        flex: 1,
-                                                        border: 'none',
-                                                        outline: 'none',
-                                                        fontSize: '15px',
-                                                        fontWeight: '500',
-                                                        background: 'transparent'
-                                                    }}
-                                                    maxLength="7"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group" style={{ flex: 1 }}>
-                                            <label style={{ color: 'white', fontSize: '14px' }}>CVV *</label>
-                                            <div style={{
-                                                padding: '12px 16px',
-                                                background: 'rgba(255, 255, 255, 0.95)',
-                                                borderRadius: '8px',
-                                                border: '2px solid rgba(255, 255, 255, 0.3)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px'
-                                            }}>
-                                                <span style={{ fontSize: '16px' }}>🔒</span>
-                                                <input
-                                                    type="text"
-                                                    value={cvv}
-                                                    onChange={handleCvvChange}
-                                                    placeholder="123"
-                                                    style={{
-                                                        flex: 1,
-                                                        border: 'none',
-                                                        outline: 'none',
-                                                        fontSize: '15px',
-                                                        fontWeight: '500',
-                                                        background: 'transparent'
-                                                    }}
-                                                    maxLength="4"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div style={{
-                                        marginTop: '12px',
-                                        padding: '10px',
-                                        background: 'rgba(255, 255, 255, 0.15)',
-                                        borderRadius: '8px',
-                                        fontSize: '12px',
-                                        color: 'rgba(255, 255, 255, 0.9)',
-                                        textAlign: 'center'
-                                    }}>
-                                        🔐 您的付款資訊經過加密保護
+                                    <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px' }}>
+                                        送出訂單後，請至櫃檯完成付款
                                     </div>
                                 </div>
 
@@ -5104,10 +4908,10 @@
                                                     borderRadius: '50%',
                                                     animation: 'spin 1s linear infinite'
                                                 }}></span>
-                                                處理付款中...
+                                                送出中...
                                             </span>
                                         ) : (
-                                            '💳 送出訂單並付款'
+                                            '送出訂單'
                                         )}
                                     </button>
                                 </div>
